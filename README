@@ -1,1 +1,3 @@
-Test
+**CURRENT STATE OF THE PROJECT**
+William: I have set up the environment and I believe it is up and running now (python manage.py runserver to run the web app). If any of you see stuff that needs
+changed or fixed feel free to go ahead and do so, I am sort of learning Django and API stuff on the fly for this project.
