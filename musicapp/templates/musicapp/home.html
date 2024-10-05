@@ -1,0 +1,16 @@
+<!-- musicapp/templates/musicapp/home.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Artist Search Results</title>
+</head>
+<body>
+    <h1>Artist Search Results</h1>
+    <ul>
+        {% for artist in artists %}
+            <li>{{ artist.name }} - Popularity: {{ artist.popularity }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

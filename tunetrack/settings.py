@@ -9,11 +9,24 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+import os
 from pathlib import Path
+from dotenv import load_dotenv
+from pathlib import Path
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from the .env file
+load_dotenv(os.path.join(BASE_DIR, '.env'))
+
+# Access the variables
+SPOTIFY_CLIENT_ID = os.getenv('4461206ef25a4ebab77c254cdf61b2bc')
+SPOTIFY_CLIENT_SECRET = os.getenv('69401507e02f4b2fa968967ca7114f4f')
+SPOTIFY_REDIRECT_URI = os.getenv('http://localhost:8000/callback/')
 
 
 # Quick-start development settings - unsuitable for production
@@ -29,6 +42,20 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [],  # Leave empty if you're using app directories
+        'APP_DIRS': True,  # This should be True to look for templates in app directories
+        'OPTIONS': {
+            'context_processors': [
+                # ... your context processors ...
+            ],
+        },
+    },
+]
+
 
 INSTALLED_APPS = [
     "django.contrib.admin",
