@@ -7,6 +7,7 @@ from spotipy.oauth2 import SpotifyClientCredentials, SpotifyOAuth
 load_dotenv()
 
 def get_spotify_client():
+<<<<<<< HEAD
     # client_credentials_manager = SpotifyClientCredentials(
     #     client_id=os.getenv('SPOTIFY_CLIENT_ID'),
     #     client_secret=os.getenv('SPOTIFY_CLIENT_SECRET')
@@ -20,3 +21,13 @@ def get_spotify_client():
                                                      client_secret = 'SPO69401507e02f4b2fa968967ca7114f4f', 
                                                      redirect_uri = 'http://localhost:8080'))
     return sp
+=======
+    client_id = os.getenv('SPOTIPY_CLIENT_ID')
+    client_secret = os.getenv('SPOTIPY_CLIENT_SECRET')
+    client_credentials_manager = SpotifyClientCredentials(
+        client_id=client_id,
+        client_secret=client_secret
+    )
+    sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+    return sp
+>>>>>>> refs/remotes/origin/main
