@@ -11,7 +11,7 @@ def get_spotify_client():
     #                                                  client_secret = 'SPO69401507e02f4b2fa968967ca7114f4f', 
     #                                                  redirect_uri = 'http://localhost:8080/callback/'))
 
-    sp = spotipy.Spotify(auth_manager = SpotifyOAuth(client_id = 'f1675f5f0d9c4f43b99b5eab4e381ab0', 
-                                                     client_secret = '2b464e065bb64a7887edee8f40bb9391', 
-                                                     redirect_uri = 'python manage.py runserver 0.0.0.0:8000'))
+    sp = spotipy.Spotify(auth_manager = SpotifyOAuth(client_id = 'SPOTIPY_CLIENT_ID', 
+                                                     client_secret = 'SPOTIPY_CLIENT_SECRET', 
+                                                     redirect_uri = 'SPOTIPY_REDIRECT_URI'))
     return sp
