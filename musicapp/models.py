@@ -55,6 +55,6 @@ class Playlist(models.Model):
     playlist_id = models.IntegerField(max_length=64, primary_key=True)
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     song_id = models.ManyToManyField(Playlist_Song)
-    name = models.CharField(max_length=128),
+    name = models.CharField(max_length=128)
     date_created = models.DateTimeField(auto_now_add=True)
 

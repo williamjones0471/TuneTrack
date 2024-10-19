@@ -54,9 +54,9 @@ from spotipy.oauth2 import SpotifyOAuth
 
 def login_view(request):
     sp_oauth = SpotifyOAuth(
-        client_id=os.getenv('SPOTIPY_CLIENT_ID'),
-        client_secret=os.getenv('SPOTIPY_CLIENT_SECRET'),
-        redirect_uri=os.getenv('SPOTIPY_REDIRECT_URI'),
+        client_id=settings.SPOTIPY_CLIENT_ID,
+        client_secret=settings.SPOTIPY_CLIENT_SECRET,
+        redirect_uri=settings.SPOTIPY_REDIRECT_URI,
         scope='user-read-private user-read-email'
     )
     auth_url = sp_oauth.get_authorize_url()

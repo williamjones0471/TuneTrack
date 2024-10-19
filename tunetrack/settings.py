@@ -21,7 +21,7 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Load environment variables from the .env file
-load_dotenv(os.path.join(BASE_DIR, '.env'))
+# load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 # Access the variables
 SPOTIFY_CLIENT_ID = os.getenv('SPOTIPY_CLIENT_ID')
@@ -33,28 +33,23 @@ SPOTIFY_REDIRECT_URI = os.getenv('SPOTIPY_REDIRECT_URI')
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-g&=s5pa5@v^ue5g$r81(#ucg6a1*&icmiirmg4=@c(l3snbw7&"
+# SECRET_KEY = "django-insecure-g&=s5pa5@v^ue5g$r81(#ucg6a1*&icmiirmg4=@c(l3snbw7&"
+SECRET_KEY = os.getenv('SECRET_KEY')
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = []
+
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'curly-guide-wr96w79x97wqc9579-8000.app.github.dev',
+]
 
 
 # Application definition
-
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],  # Leave empty if you're using app directories
-        'APP_DIRS': True,  # This should be True to look for templates in app directories
-        'OPTIONS': {
-            'context_processors': [
-                # ... your context processors ...
-            ],
-        },
-    },
-]
 
 
 INSTALLED_APPS = [
