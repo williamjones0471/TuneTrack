@@ -3,6 +3,7 @@
 
 {% block content %}
   <h1>Welcome, {{ user }}</h1>
+  <a href="{% url 'logout' %}">Logout</a>
   <form method="post">
     {% csrf_token %}
     <input type="text" name="artist" placeholder="Search for an artist">

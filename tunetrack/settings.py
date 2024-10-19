@@ -15,13 +15,13 @@ from dotenv import load_dotenv
 from pathlib import Path
 
 # Load environment variables from .env file
-load_dotenv()
+# load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Load environment variables from the .env file
-# load_dotenv(os.path.join(BASE_DIR, '.env'))
+load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 # Access the variables
 SPOTIFY_CLIENT_ID = os.getenv('SPOTIPY_CLIENT_ID')
@@ -48,6 +48,7 @@ ALLOWED_HOSTS = [
     'curly-guide-wr96w79x97wqc9579-8000.app.github.dev',
 ]
 
+AUTH_USER_MODEL = 'musicapp.User'
 
 # Application definition
 
@@ -91,6 +92,11 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "tunetrack.wsgi.application"
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
+
 
 
 # Database

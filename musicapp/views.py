@@ -149,15 +149,32 @@ def home(request):
             'artists': artists,
         })
 
-"""
+
 from django.shortcuts import render, redirect
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login as auth_login
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+import spotipy
+from spotipy.oauth2 import SpotifyOAuth
+from django.contrib.auth import logout
+
+User = get_user_model()
+"""
+
+from django.shortcuts import render, redirect
+from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout, login as auth_login
+from django.contrib.auth import get_user_model
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 
+User = get_user_model()
+
+
+
+"""
 def login_view(request):
     sp_oauth = SpotifyOAuth(
         client_id=settings.SPOTIFY_CLIENT_ID,
@@ -168,7 +185,12 @@ def login_view(request):
     )
     auth_url = sp_oauth.get_authorize_url()
     return redirect(auth_url)
+"""
 
+def login_view(request):
+    return render(request, 'musicapp/login.html')
+
+    
 def callback(request):
     sp_oauth = SpotifyOAuth(
         client_id=settings.SPOTIFY_CLIENT_ID,
@@ -178,6 +200,43 @@ def callback(request):
         cache_path=None
     )
     code = request.GET.get('code')
+
+    try:
+        token_info = sp_oauth.get_access_token(code)
+    except Exception as e:
+        # Handle the exception (e.g., log it and show an error message)
+        print(f"Error obtaining access token: {e}")
+        return render(request, 'musicapp/error.html', {'message': 'Failed to authenticate with Spotify.'})
+
+    if token_info:
+        # Ensure refresh_token is present
+        if 'refresh_token' not in token_info:
+            return render(request, 'musicapp/error.html', {'message': 'Failed to retrieve refresh token.'})
+
+        # Store the entire token_info in the session
+        request.session['token_info'] = token_info
+
+        access_token = token_info['access_token']
+
+        # Fetch user profile information
+        sp = spotipy.Spotify(auth=access_token)
+        spotify_user = sp.current_user()
+
+        # Create or get the user
+        user, created = User.objects.get_or_create(
+            username=spotify_user['id'],
+            defaults={
+                'email': spotify_user.get('email', ''),
+                'first_name': spotify_user.get('display_name', '')
+            }
+        )
+        auth_login(request, user)
+
+        return redirect('home')
+    else:
+        return render(request, 'musicapp/error.html', {'message': 'Failed to authenticate with Spotify.'})
+
+    """
     token_info = sp_oauth.get_access_token(code)
 
     if token_info:
@@ -203,9 +262,14 @@ def callback(request):
         return redirect('home')
     else:
         return render(request, 'musicapp/error.html', {'message': 'Failed to authenticate with Spotify.'})
-
+"""
 @login_required
 def home(request):
+
+    token_info = request.session.get('token_info', None)
+    if not token_info:
+        return redirect('login')
+    
     sp_oauth = SpotifyOAuth(
         client_id=settings.SPOTIFY_CLIENT_ID,
         client_secret=settings.SPOTIFY_CLIENT_SECRET,
@@ -214,10 +278,61 @@ def home(request):
         cache_path=None,
     )
 
-    token_info = request.session.get('token_info', None)
-    if not token_info:
+    
+    
+      # Check if token is expired
+    if sp_oauth.is_token_expired(token_info):
+        try:
+            # Refresh the token
+            token_info = sp_oauth.refresh_access_token(token_info['refresh_token'])
+            # Update the session with the new token_info
+            request.session['token_info'] = token_info
+        except Exception as e:
+            print(f"Error refreshing access token: {e}")
+            return redirect('login')
+
+    access_token = token_info['access_token']
+    sp = spotipy.Spotify(auth=access_token)
+
+    try:
+        # Get the user's display name
+        spotify_user = sp.current_user()
+        user_display_name = spotify_user.get('display_name', 'User')
+    except Exception as e:
+        print(f"Error fetching user profile: {e}")
         return redirect('login')
 
+    if request.method == "POST":
+        artist = request.POST.get("artist", "")
+        print(artist)
+
+        try:
+            # Fetch general data from Spotify (e.g., search for artists)
+            results = sp.search(q=f'artist:{artist}', type='artist')
+            artists = results['artists']['items']
+
+            if artists:
+                artist_id = artists[0]['id']
+                top_tracks = sp.artist_top_tracks(artist_id)
+                print(top_tracks)
+        except Exception as e:
+            print(f"Error searching for artist: {e}")
+            artists = []
+    else:
+        try:
+            # Fetch general data from Spotify (e.g., search for artists)
+            results = sp.search(q='artist:Coldplay', type='artist')
+            artists = results['artists']['items']
+        except Exception as e:
+            print(f"Error fetching default artist: {e}")
+            artists = []
+
+    return render(request, 'musicapp/home.html', {
+        'user': user_display_name,
+        'artists': artists,
+    })
+
+"""
     # Check if token is expired
     if sp_oauth.is_token_expired(token_info):
         # Refresh the token
@@ -257,3 +372,25 @@ def home(request):
             'user': user_display_name,
             'artists': artists,
         })
+"""
+def logout_view(request):
+    # Clear the session data
+    request.session.flush()
+    # Log out the user
+    logout(request)
+    return redirect('logout_confirmation')
+
+def logout_confirmation(request):
+    return render(request, 'musicapp/logout_confirmation.html')
+
+def spotify_login(request):
+    sp_oauth = SpotifyOAuth(
+        client_id=settings.SPOTIFY_CLIENT_ID,
+        client_secret=settings.SPOTIFY_CLIENT_SECRET,
+        redirect_uri=settings.SPOTIFY_REDIRECT_URI,
+        scope='user-read-private user-read-email',
+        cache_path=None
+    )
+    auth_url = sp_oauth.get_authorize_url()
+    return redirect(auth_url)
+

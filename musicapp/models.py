@@ -23,6 +23,7 @@ class User(AbstractUser):
         related_name='musicapp_user_permissions_set',
         related_query_name='musicapp_user_permission'
     )
+    pass
 
 
 class Artist(models.Model):
