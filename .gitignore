@@ -49,7 +49,11 @@ coverage.xml
 
 # Django stuff:
 *.log
+*.pyc
+*.pyo 
+*.pyd
 local_settings.py
+*.sqlite3
 db.sqlite3
 db.sqlite3-journal
 
@@ -118,6 +122,8 @@ cython_debug/
 
 # VSCode settings
 .vscode/
+.idea/
 
 # MacOS files
 .DS_Store
+Thumbs.db
