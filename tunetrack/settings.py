@@ -40,13 +40,13 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-# ALLOWED_HOSTS = []
+ALLOWED_HOSTS = []
 
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    'curly-guide-wr96w79x97wqc9579-8000.app.github.dev',
-]
+# ALLOWED_HOSTS = [
+#    'localhost',
+#    '127.0.0.1',
+#    'curly-guide-wr96w79x97wqc9579-8000.app.github.dev',
+#]
 
 AUTH_USER_MODEL = 'musicapp.User'
 
