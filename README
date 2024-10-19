@@ -4,3 +4,31 @@ changed or fixed feel free to go ahead and do so, I am sort of learning Django a
 
 10/19/2024 -
 William: To run the server you have to use the command: python manage.py runserver 0.0.0.0:8000
+
+To get codespaces set up:
+1. Create a codespace on main
+2. Clone the repo:
+git clone https://github.com/your-username/tunetrack.git
+cd tunetrack
+
+3. Create a virtual environment and activate your venv:
+python3 -m venv venv
+source venv/bin/activate
+
+4. Upgrade pip:
+pip install --upgrade pip
+
+5. Create the .env file
+cp .env.example .env
+(This should just create it but if not create a file named .env and copy over the contents from .env.example)
+
+6. Install dependancies:
+pip install -r requirements.txt
+
+7. Apply database migrations:
+python manage.py migrate
+
+8. Run the server:
+python manage.py runserver
+
+(I'm pretty sure this is right not positive)
