@@ -26,7 +26,7 @@ load_dotenv(os.path.join(BASE_DIR, '.env'))
 # Access the variables
 SPOTIFY_CLIENT_ID = os.getenv('4461206ef25a4ebab77c254cdf61b2bc')
 SPOTIFY_CLIENT_SECRET = os.getenv('69401507e02f4b2fa968967ca7114f4f')
-SPOTIFY_REDIRECT_URI = os.getenv('http://localhost:8000/callback/')
+SPOTIFY_REDIRECT_URI = os.getenv('python manage.py runserver 0.0.0.0:8000')
 
 
 # Quick-start development settings - unsuitable for production
