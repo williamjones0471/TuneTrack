@@ -395,17 +395,16 @@ def spotify_login(request):
     return redirect(auth_url)
 
 def create_playlist(request):
-       # Check if the user is authenticated and the access token exists
+       #Check if user is authenticated and access token
     token_info = request.session.get('token_info')
     
     if not token_info:
-        # Redirect to the login page or Spotify auth flow if the token is missing
+        #Redirect to the login page 
         return redirect('spotify_login')
 
-    # Extract access token from session
     access_token = token_info.get('access_token')
 
-    # Initialize the Spotipy client with the user's access token
+    # Initialize the Spotipy client with the user access token
     sp = spotipy.Spotify(auth=access_token)
     print("Token scopes:", token_info['scope'])
 
@@ -424,7 +423,7 @@ def create_playlist(request):
             description=playlist_description
         )
 
-        # After creating the playlist, you can redirect or display a success message
+        # After creating the playlist display a success message
         return render(request, 'musicapp/playlist_success.html', {'playlist': playlist})
 
     return render(request, 'musicapp/create_playlist.html')
