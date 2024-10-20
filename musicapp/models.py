@@ -45,16 +45,16 @@ class Song(models.Model):
     genre = models.CharField(max_length=64)
 
 class Playlist_Song(models.Model):
-    playlist_id = models.IntegerField(primary_key=True)
-    playlist_song_id = models.IntegerField()
-    song_id = models.ForeignKey(Song, on_delete=models.CASCADE)
-    name = models.CharField(max_length=128)
+    playlist = models.ForeignKey('Playlist', on_delete=models.CASCADE) 
+    song = models.ForeignKey(Song, on_delete=models.CASCADE)           
     date_added = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        unique_together = ('playlist', 'song')
+
 class Playlist(models.Model):
-    playlist_id = models.IntegerField(primary_key=True)
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-    song_id = models.ManyToManyField(Playlist_Song)
+    user = models.ForeignKey('User', on_delete=models.CASCADE)  
+    songs = models.ManyToManyField(Song, through='Playlist_Song', blank=True) 
     name = models.CharField(max_length=128, default='My Playlist')
     date_created = models.DateTimeField(auto_now_add=True)
 
