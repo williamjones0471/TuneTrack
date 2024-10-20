@@ -8,5 +8,5 @@ urlpatterns = [
     path('callback/', views.callback, name='callback'),
     path('logout/', views.logout_view, name='logout'),
     path('logout-confirmation/', views.logout_confirmation, name='logout_confirmation'),
-
+    path('new_playlist/', views.create_playlist, name='create_playlist')
 ]

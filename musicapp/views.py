@@ -196,7 +196,7 @@ def callback(request):
         client_id=settings.SPOTIFY_CLIENT_ID,
         client_secret=settings.SPOTIFY_CLIENT_SECRET,
         redirect_uri=settings.SPOTIFY_REDIRECT_URI,
-        scope='user-read-private user-read-email',
+        scope='playlist-modify-private playlist-modify-public user-read-private user-read-email',
         cache_path=None
     )
     code = request.GET.get('code')
@@ -274,7 +274,7 @@ def home(request):
         client_id=settings.SPOTIFY_CLIENT_ID,
         client_secret=settings.SPOTIFY_CLIENT_SECRET,
         redirect_uri=settings.SPOTIFY_REDIRECT_URI,
-        scope='user-read-private user-read-email',
+        scope='playlist-modify-private playlist-modify-public user-read-private user-read-email',
         cache_path=None,
     )
 
@@ -388,9 +388,43 @@ def spotify_login(request):
         client_id=settings.SPOTIFY_CLIENT_ID,
         client_secret=settings.SPOTIFY_CLIENT_SECRET,
         redirect_uri=settings.SPOTIFY_REDIRECT_URI,
-        scope='user-read-private user-read-email',
+        scope='playlist-modify-private playlist-modify-public user-read-private user-read-email',
         cache_path=None
     )
     auth_url = sp_oauth.get_authorize_url()
     return redirect(auth_url)
 
+def create_playlist(request):
+       # Check if the user is authenticated and the access token exists
+    token_info = request.session.get('token_info')
+    
+    if not token_info:
+        # Redirect to the login page or Spotify auth flow if the token is missing
+        return redirect('spotify_login')
+
+    # Extract access token from session
+    access_token = token_info.get('access_token')
+
+    # Initialize the Spotipy client with the user's access token
+    sp = spotipy.Spotify(auth=access_token)
+    print("Token scopes:", token_info['scope'])
+
+    if request.method == 'POST':
+        print("Token scopes:", token_info['scope'])
+        playlist_name = request.POST.get('playlist_name')
+        playlist_description = request.POST.get('playlist_description')
+
+        user_id = sp.current_user()['id']
+
+        # Create a new playlist with the provided name and description
+        playlist = sp.user_playlist_create(
+            user=user_id,
+            name=playlist_name,
+            public=True,  # Set to False if you want the playlist to be private
+            description=playlist_description
+        )
+
+        # After creating the playlist, you can redirect or display a success message
+        return render(request, 'musicapp/playlist_success.html', {'playlist': playlist})
+
+    return render(request, 'musicapp/create_playlist.html')
