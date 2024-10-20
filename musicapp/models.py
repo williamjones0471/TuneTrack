@@ -23,37 +23,36 @@ class User(AbstractUser):
         related_name='musicapp_user_permissions_set',
         related_query_name='musicapp_user_permission'
     )
-    pass
 
 
 class Artist(models.Model):
-    artist_id = models.IntegerField(max_length=64, primary_key=True)
+    artist_id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=128)
     genre = models.CharField(max_length=64)
 
 class Album(models.Model):
-    album_id = models.IntegerField(max_length=64, primary_key=True)
+    album_id = models.IntegerField(primary_key=True)
     artist_id = models.ForeignKey(Artist, on_delete=models.CASCADE)
     title = models.CharField(max_length=128)
     release_date = models.DateField(max_length=64)
 
 class Song(models.Model):
-    song_id = models.IntegerField(max_length=64, primary_key=True)
+    song_id = models.IntegerField(primary_key=True)
     artist_id = models.ForeignKey(Artist, max_length=64, on_delete=models.CASCADE)
     album_id = models.ForeignKey(Album, max_length=64, on_delete=models.CASCADE)
     title = models.CharField(max_length=128)
-    duration = models.IntegerField(max_length=128)
+    duration = models.IntegerField()
     genre = models.CharField(max_length=64)
 
 class Playlist_Song(models.Model):
-    playlist_id = models.IntegerField(max_length=64, primary_key=True)
-    playlist_song_id = models.IntegerField(max_length=64)
+    playlist_id = models.IntegerField(primary_key=True)
+    playlist_song_id = models.IntegerField()
     song_id = models.ForeignKey(Song, on_delete=models.CASCADE)
     name = models.CharField(max_length=128)
     date_added = models.DateTimeField(auto_now_add=True)
 
 class Playlist(models.Model):
-    playlist_id = models.IntegerField(max_length=64, primary_key=True)
+    playlist_id = models.IntegerField(primary_key=True)
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     song_id = models.ManyToManyField(Playlist_Song)
     name = models.CharField(max_length=128, default='My Playlist')
