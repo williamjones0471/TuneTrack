@@ -6,8 +6,13 @@
         <title>Playlist Created Successfully!</title>
     </head>
     <body>
-        <p>Playlist Name: {{ playlist.name }}</p>
-        <p>Playlist ID: {{ playlist.id }}</p>
-        <p>Playlist URL: <a href="{{ playlist.external_urls.spotify }}" target="_blank">{{ playlist.external_urls.spotify }}</a></p>
+        <div>
+            <p>Playlist Name: {{ playlist.name }}</p>
+            <p>Playlist ID: {{ playlist.id }}</p>
+            <p>Playlist URL: <a href="{{ playlist.external_urls.spotify }}" target="_blank">{{ playlist.external_urls.spotify }}</a></p>
+        </div>
+        <div>
+            <a href="{% url 'home' %}">Return to Dashboard</a>
+        </div>
     </body>
 </html>
