@@ -1,19 +1,43 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <link rel="stylesheet" href="{% static 'musicapp/styles.css' %}">
         <title>Create Playlist:</title>
     </head>
     <body>
+        <div>
+            <ul class="nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'home' %}">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'select_playlist' %}">Back to Playlists</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                </li>
+            </ul>
+        </div>
+
+        <hr>
+
         <form method="POST">
             {% csrf_token %}
             <label for="playlist_name">Playlist Name:</label>
             <input type="text" id="playlist_name" name="playlist_name" required>
         
+            <br>
+
             <label for="playlist_description">Playlist Description:</label>
-            <textarea id="playlist_description" name="playlist_description"></textarea>
+            <input type="text" id="playlist_description" name="playlist_description"></input>
         
+            <br>
+
             <button type="submit">Create Playlist</button>
         </form>
     </body>

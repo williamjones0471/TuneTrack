@@ -1,18 +1,40 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <link rel="stylesheet" href="{% static 'musicapp/styles.css' %}">
         <title>Playlist Created Successfully!</title>
     </head>
     <body>
+        <div>
+            <ul class="nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'home' %}">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'select_playlist' %}">Back to Playlists</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                </li>
+            </ul>
+        </div>
+
+        <hr>
+
         <div>
             <p>Playlist Name: {{ playlist.name }}</p>
             <p>Playlist ID: {{ playlist.id }}</p>
             <p>Playlist URL: <a href="{{ playlist.external_urls.spotify }}" target="_blank">{{ playlist.external_urls.spotify }}</a></p>
         </div>
-        <div>
-            <a href="{% url 'home' %}">Return to Dashboard</a>
+        <div class="add_songs">
+            <form action="{% url 'search_songs' playlist.id %}">
+                <button type="submit" class="add_song_btn">Add Songs</button>
+            </form>
         </div>
     </body>
 </html>
