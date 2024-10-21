@@ -1,18 +1,28 @@
-<!-- musicapp/templates/musicapp/home.html -->
 {% extends 'base_generic.html' %}
 
-{% block content %}
-  <form method="post">
-    {% csrf_token %}
-    <input type="text" name="artist" placeholder="Search for an artist">
-    <button type="submit">Search</button>
-  </form>
-  {% if artists %}
-    <h2>Artists:</h2>
-    <ul>
-      {% for artist in artists %}
-        <li>{{ artist.name }}</li>
-      {% endfor %}
-    </ul>
-  {% endif %}
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+  </head>
+  <body>
+    {% block content %}
+      <h1>Welcome, {{ user }}</h1>
+      <form method="post">
+        {% csrf_token %}
+        <input type="text" name="artist" placeholder="Search for an artist">
+        <button type="submit">Search</button>
+      </form>
+      {% if artists %}
+        <h2>Artists:</h2>
+        <ul>
+          {% for artist in artists %}
+            <li>{{ artist.name }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endblock %}
+  </body>
+</html>
