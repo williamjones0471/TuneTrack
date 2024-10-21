@@ -1,0 +1,83 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <link rel="stylesheet" href="{% static 'musicapp/styles.css' %}">
+        <title>Search Songs</title>
+    </head>
+    <body>
+        <div>
+            <ul class="nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'home' %}">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'select_playlist' %}">Back to Playlists</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                </li>
+            </ul>
+        </div>
+
+        <hr>
+
+        <div class="add_songs">
+            <h1>Add Songs</h1>
+            <form method="post">
+                {% csrf_token %}
+                <input type="text" name="song_name" placeholder="Enter song name" required>
+                <button type="submit">Search</button>
+            </form>
+
+            {% if search_results %}
+                <h2>Search Results:</h2>
+                <form method="post" action="{% url 'add_song_to_playlist' playlist_id %}"> 
+                    {% csrf_token %}
+                    <ul>
+                        {% for song in search_results %}
+                            <li>
+                                <input type="checkbox" name="song_ids" value="{{ song.id }}">
+                                {{ song.name }} by 
+                                {% for artist in song.artists %}
+                                    {{ artist.name }}{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    <button type="submit">Add Selected Songs to Playlist</button>
+                </form>
+            {% endif %}
+        </div>
+
+        <hr>
+
+        <div class="playlist_detail">
+            <h1>Playlist: {{ playlist.name }}</h1>
+            <p><strong>Description:</strong> {{ playlist.description }}</p>
+    
+            <h2>Playlist Contents:</h2>
+            <ul>
+                {% if playlist.songs %}
+                    {% for song in playlist.songs %}
+                        <li>
+                            <strong>{{ song.title }}</strong> by {{ song.artist_name }}
+                            <span>(Duration: {{ song.duration }} seconds)</span>
+    
+                            <form method="post" action="{% url 'delete_song_from_playlist' playlist_id song.id %}">
+                                {% csrf_token %}
+                                <button type="submit">Remove Song</button>
+                            </form>
+                        </li>
+                    {% endfor %}
+                {% else %}
+                    <li>No songs found in this playlist.</li>
+                {% endif %}
+            </ul>
+        </div>
+    </body>
+</html>
