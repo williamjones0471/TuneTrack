@@ -166,8 +166,11 @@ from django.shortcuts import render, redirect
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout, login as auth_login
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, authenticate
+from django.contrib.auth.models import User
 import spotipy
+from django.http import HttpResponseRedirect, HttpResponse
+from django.urls import reverse
 from spotipy.oauth2 import SpotifyOAuth
 
 User = get_user_model()
@@ -427,3 +430,146 @@ def create_playlist(request):
         return render(request, 'musicapp/playlist_success.html', {'playlist': playlist})
 
     return render(request, 'musicapp/create_playlist.html')
+
+def add_song_to_playlist(request, playlist_id):
+    # Get the access token from session
+    token_info = request.session.get('token_info')
+    
+    if not token_info:
+        #Redirect to the login page 
+        return redirect('spotify_login')
+
+    access_token = token_info.get('access_token')
+    sp = spotipy.Spotify(auth=access_token)
+
+    if request.method == 'POST':
+        song_ids = request.POST.getlist('song_ids')
+        if song_ids:
+            try:
+                sp.playlist_add_items(playlist_id, song_ids)
+                return redirect('search_songs', playlist_id=playlist_id)  
+            except Exception as e:
+                print(f"Error adding songs to playlist: {e}")
+                return render(request, 'musicapp/error.html', {'message': 'Failed to add songs to playlist.'})
+
+    return redirect('search_songs', playlist_id)
+
+def search_songs(request, playlist_id):
+    token_info = request.session.get('token_info')
+    
+    if not token_info:
+        #Redirect to the login page 
+        return redirect('spotify_login')
+
+    access_token = token_info.get('access_token')
+    sp = spotipy.Spotify(auth=access_token)
+    search_results = []
+
+    try:
+        # Fetch playlist details from Spotify
+        playlist = sp.playlist(playlist_id)
+        songs = playlist['tracks']['items']
+
+        # Prepare data for the template
+        playlist_data = {
+            'name': playlist['name'],
+            'description': playlist.get('description', 'No description available.'),
+            'songs': [
+                {
+                    'id': song['track']['id'],  # Ensure we are including the song ID
+                    'title': song['track']['name'],
+                    'artist_name': ', '.join([artist['name'] for artist in song['track']['artists']]),
+                    'duration': song['track']['duration_ms'] // 1000
+                } for song in songs if song['track']
+            ],
+        }
+    except Exception as e:
+        print(f"Error fetching playlist details: {e}")
+        return render(request, 'musicapp/error.html', {'message': 'Failed to fetch playlist details.'})
+
+    if request.method == 'POST':
+        song_name = request.POST.get('song_name')
+        if song_name:
+            # Perform the search
+            results = sp.search(q=song_name, type='track', limit=10)
+            search_results = results.get('tracks', {}).get('items', [])  # Access the list of tracks
+
+    return render(request, 'musicapp/search_songs.html', {
+        'search_results': search_results, 
+        'playlist_id': playlist_id,  
+        'playlist': playlist_data,
+    })
+
+def select_playlist(request):
+    token_info = request.session.get('token_info')
+    
+    if not token_info:
+        #Redirect to the login page 
+        return redirect('spotify_login')
+
+    access_token = token_info.get('access_token')
+    sp = spotipy.Spotify(auth=access_token)
+
+    playlists = sp.current_user_playlists()  # Fetch user playlists
+
+    return render(request, 'musicapp/select_playlist.html', {
+        'playlists': playlists['items'],  # Pass playlists to the template
+    })
+
+def playlist_detail(request, playlist_id):
+    token_info = request.session.get('token_info')
+    
+    if not token_info:
+        #Redirect to the login page 
+        return redirect('spotify_login')
+
+    access_token = token_info.get('access_token')
+    sp = spotipy.Spotify(auth=access_token)
+
+    try:
+        # Fetch playlist details from Spotify
+        playlist = sp.playlist(playlist_id)
+        songs = playlist['tracks']['items']
+
+        # Prepare data for the template
+        playlist_data = {
+            'name': playlist['name'],
+            'description': playlist.get('description', 'No description available.'),
+            'songs': [
+                {
+                    'id': song['track']['id'],  # Ensure we are including the song ID
+                    'title': song['track']['name'],
+                    'artist_name': ', '.join([artist['name'] for artist in song['track']['artists']]),
+                    'duration': song['track']['duration_ms'] // 1000
+                } for song in songs if song['track']
+            ],
+        }
+    except Exception as e:
+        print(f"Error fetching playlist details: {e}")
+        return render(request, 'musicapp/error.html', {'message': 'Failed to fetch playlist details.'})
+
+    return render(request, 'musicapp/playlist_detail.html', {
+        'playlist': playlist_data,
+        'playlist_id': playlist_id  # Pass the playlist ID to the template
+    })
+
+def delete_song_from_playlist(request, playlist_id, song_id):
+    token_info = request.session.get('token_info')
+    
+    if not token_info:
+        #Redirect to the login page 
+        return redirect('spotify_login')
+
+    access_token = token_info.get('access_token')
+    sp = spotipy.Spotify(auth=access_token)
+
+    try:
+        print(dir(sp))
+        # Remove the song from the playlist using the Spotify API
+        sp.playlist_remove_all_occurrences_of_items(playlist_id, [song_id],)
+    except Exception as e:
+        print(f"Error removing song: {e}")
+        return render(request, 'musicapp/error.html', {'message': 'Failed to remove song from playlist.'})
+
+    # Redirect back to the playlist detail page after successful deletion
+    return redirect('search_songs', playlist_id=playlist_id)
