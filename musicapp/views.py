@@ -4,15 +4,19 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout, login
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
-import spotipy
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
-from spotipy.oauth2 import SpotifyOAuth
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.cache import cache
+
+import spotipy
+import spotipy.util as util
+from spotipy.oauth2 import SpotifyOAuth
 
 from .models import User
 
 def login_view(request):
+    cache.delete('login')
     return render(request, 'musicapp/login.html')
 
     
@@ -21,7 +25,7 @@ def callback(request):
         client_id=settings.SPOTIFY_CLIENT_ID,
         client_secret=settings.SPOTIFY_CLIENT_SECRET,
         redirect_uri=settings.SPOTIFY_REDIRECT_URI,
-        scope='playlist-modify-private playlist-modify-public user-read-private user-read-email',
+        scope='playlist-modify-private playlist-modify-public user-read-private user-read-email user-read-recently-played',
         cache_path=None
     )
     code = request.GET.get('code')
@@ -57,6 +61,7 @@ def callback(request):
             return render(request, 'musicapp/error.html', {'message': 'Failed to authenticate with Spotify.'})
     
 def create_account(request):
+    cache.delete('create_account')
     token_info = request.session.get('token_info')
     access_token = token_info.get('access_token')
     sp = spotipy.Spotify(auth=access_token)
@@ -95,6 +100,7 @@ def create_account(request):
     return render(request, 'musicapp/create_account.html')
 
 def returning_user(request):
+    cache.delete('returning_user')
     token_info = request.session.get('token_info')
     access_token = token_info.get('access_token')
     sp = spotipy.Spotify(auth=access_token)
@@ -144,9 +150,11 @@ def home(request):
         client_id=settings.SPOTIFY_CLIENT_ID,
         client_secret=settings.SPOTIFY_CLIENT_SECRET,
         redirect_uri=settings.SPOTIFY_REDIRECT_URI,
-        scope='playlist-modify-private playlist-modify-public user-read-private user-read-email',
+        scope='playlist-modify-private playlist-modify-public user-read-private user-read-recently-played',
         cache_path=None,
     )
+
+
 
     
     
@@ -161,7 +169,7 @@ def home(request):
             print(f"Error refreshing access token: {e}")
             return redirect('login')
 
-    access_token = token_info['access_token']
+    access_token = token_info.get('access_token')
     sp = spotipy.Spotify(auth=access_token)
 
     try:
@@ -193,6 +201,8 @@ def home(request):
             # Fetch general data from Spotify (e.g., search for artists)
             results = sp.search(q='artist:Coldplay', type='artist')
             artists = results['artists']['items']
+
+            print(dir(sp))
         except Exception as e:
             print(f"Error fetching default artist: {e}")
             artists = []
