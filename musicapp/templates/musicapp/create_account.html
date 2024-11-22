@@ -1,0 +1,19 @@
+{% block content %}
+    {% if message %}
+    <div class="alert-info">
+        {{ message }}
+    </div>
+    {% endif %}
+
+  <h1>Please Enter Details Below:</h1>
+  
+  <form method="post">
+    {% csrf_token %}
+
+    <input name="firstname" type="text" placeholder="Firstname">
+    <input name="lastname" type="text" placeholder="Lastname" >
+    <input name="password" type="password" placeholder="Password" required>
+    <input name="confirmation" type="password" placeholder="Confirm Password" required>
+    <input type="submit" value="Submit">
+  </form>
+{% endblock %}
