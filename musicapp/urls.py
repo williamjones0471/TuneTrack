@@ -16,4 +16,5 @@ urlpatterns = [
     path('playlist/<str:playlist_id>/delete_song/<str:song_id>/', views.delete_song_from_playlist, name='delete_song_from_playlist'),
     path('login/create-account', views.create_account, name='create_account'),
     path('login/returning-user', views.returning_user, name='returning_user'),
+    path('analytics/', views.analytics, name='analytics'),
 ]
