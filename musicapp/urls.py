@@ -17,4 +17,5 @@ urlpatterns = [
     path('login/create-account', views.create_account, name='create_account'),
     path('login/returning-user', views.returning_user, name='returning_user'),
     path('analytics/', views.analytics, name='analytics'),
+    path('playlist/<str:playlist_id>/analytics/', views.playlist_analytics, name='playlist_analytics'),
 ]

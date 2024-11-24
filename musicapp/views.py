@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout, login
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
+from django.contrib import messages
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist
@@ -444,8 +445,8 @@ def analytics(request):
 
     # Fetch user's top artists and tracks
     try:
-        top_artists_data = sp.current_user_top_artists(limit=20, time_range='long_term')
-        top_tracks_data = sp.current_user_top_tracks(limit=20, time_range='long_term')
+        top_artists_data = sp.current_user_top_artists(limit=50, time_range='long_term')
+        top_tracks_data = sp.current_user_top_tracks(limit=50, time_range='long_term')
     except Exception as e:
         print(f"Error fetching user's top artists or tracks: {e}")
         return redirect('login')
@@ -490,3 +491,110 @@ def analytics(request):
     }
 
     return render(request, 'musicapp/analytics.html', context)
+
+@login_required
+def playlist_analytics(request, playlist_id):
+    # Get the access token from session
+    token_info = request.session.get('token_info')
+    
+    if not token_info:
+        # Redirect to the login page 
+        return redirect('spotify_login')
+
+    sp_oauth = SpotifyOAuth(
+        client_id=settings.SPOTIFY_CLIENT_ID,
+        client_secret=settings.SPOTIFY_CLIENT_SECRET,
+        redirect_uri=settings.SPOTIFY_REDIRECT_URI,
+        scope=settings.SPOTIFY_SCOPE,
+        cache_path=None
+    )
+
+    # Check if token is expired
+    if sp_oauth.is_token_expired(token_info):
+        try:
+            # Refresh the token
+            token_info = sp_oauth.refresh_access_token(token_info['refresh_token'])
+            # Update the session with the new token_info
+            request.session['token_info'] = token_info
+        except Exception as e:
+            print(f"Error refreshing access token: {e}")
+            messages.error(request, 'Session expired. Please log in again.')
+            return redirect('login')
+
+    access_token = token_info.get('access_token')
+    sp = spotipy.Spotify(auth=access_token)
+
+    # Fetch playlist tracks
+    try:
+        playlist = sp.playlist(playlist_id)
+        tracks = []
+        results = sp.playlist_tracks(playlist_id)
+        tracks.extend(results['items'])
+        while results['next']:
+            results = sp.next(results)
+            tracks.extend(results['items'])
+    except Exception as e:
+        print(f"Error fetching playlist tracks: {e}")
+        messages.error(request, 'Failed to fetch playlist tracks.')
+        return redirect('home')
+
+    if not tracks:
+        messages.info(request, 'No tracks found in the selected playlist.')
+        return render(request, 'musicapp/playlist_analytics.html')
+
+    # Process genres
+    artist_ids = set()
+    for item in tracks:
+        if item['track'] and item['track']['artists']:
+            for artist in item['track']['artists']:
+                artist_ids.add(artist['id'])
+    artist_ids = list(artist_ids)
+
+    # Fetch artist genres in batches (max 50 per request)
+    genres = {}
+    for i in range(0, len(artist_ids), 50):
+        batch_ids = artist_ids[i:i+50]
+        artists_data = sp.artists(batch_ids)['artists']
+        for artist in artists_data:
+            for genre in artist['genres']:
+                genres[genre] = genres.get(genre, 0) + 1
+
+    sorted_genres = sorted(genres.items(), key=lambda x: x[1], reverse=True)
+    top_genres = sorted_genres[:10]
+
+    # Process mood/tempo analysis
+    track_ids = [item['track']['id'] for item in tracks if item['track'] and item['track']['id']]
+    audio_features = []
+    for i in range(0, len(track_ids), 100):
+        batch_ids = track_ids[i:i+100]
+        audio_features.extend(sp.audio_features(batch_ids))
+
+    tempo_list = [f['tempo'] for f in audio_features if f]
+    energy_list = [f['energy'] for f in audio_features if f]
+    valence_list = [f['valence'] for f in audio_features if f]
+
+    avg_tempo = sum(tempo_list) / len(tempo_list) if tempo_list else 0
+    avg_energy = sum(energy_list) / len(energy_list) if energy_list else 0
+    avg_valence = sum(valence_list) / len(valence_list) if valence_list else 0
+
+    # Artist breakdown
+    artist_counts = {}
+    for item in tracks:
+        if item['track'] and item['track']['artists']:
+            for artist in item['track']['artists']:
+                name = artist['name']
+                artist_counts[name] = artist_counts.get(name, 0) + 1
+
+    sorted_artists = sorted(artist_counts.items(), key=lambda x: x[1], reverse=True)
+    top_artists_breakdown = sorted_artists[:10]
+
+    context = {
+        'playlist_name': playlist['name'],
+        'top_genres': top_genres,
+        'avg_tempo': avg_tempo,
+        'avg_energy': avg_energy,
+        'avg_valence': avg_valence,
+        'top_artists_breakdown': top_artists_breakdown,
+    }
+
+    return render(request, 'musicapp/playlist_analytics.html', context)

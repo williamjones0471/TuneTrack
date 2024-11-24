@@ -1,0 +1,114 @@
+{% extends 'base_generic.html' %}
+
+{% block title %}{{ playlist_name }} Analytics{% endblock %}
+
+{% block content %}
+<h1>Analytics for Playlist: {{ playlist_name }}</h1>
+
+{% if messages %}
+    {% for message in messages %}
+        <p>{{ message }}</p>
+    {% endfor %}
+{% endif %}
+
+{% if top_genres %}
+    <h2>Top Genres</h2>
+    <canvas id="genresChart" width="400" height="200"></canvas>
+{% else %}
+    <p>No genre data available.</p>
+{% endif %}
+
+<h2>Average Tempo</h2>
+<p>{{ avg_tempo|floatformat:2 }} BPM</p>
+
+<h2>Average Energy</h2>
+<p>{{ avg_energy|floatformat:2 }}</p>
+
+<h2>Average Valence (Happiness)</h2>
+<p>{{ avg_valence|floatformat:2 }}</p>
+
+{% if top_artists_breakdown %}
+    <h2>Top Artists</h2>
+    <canvas id="artistsChart" width="400" height="200"></canvas>
+{% else %}
+    <p>No artist data available.</p>
+{% endif %}
+
+<!-- Include the JSON data safely -->
+{{ top_genres|json_script:"top-genres-data" }}
+{{ top_artists_breakdown|json_script:"top-artists-data" }}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Parse the JSON data safely
+    var genres = JSON.parse(document.getElementById('top-genres-data').textContent);
+    var artists = JSON.parse(document.getElementById('top-artists-data').textContent);
+
+    // Prepare data for charts
+    var genresLabels = [];
+    var genresData = [];
+
+    genres.forEach(function(item) {
+        genresLabels.push(item[0]);
+        genresData.push(item[1]);
+    });
+
+    var artistsLabels = [];
+    var artistsData = [];
+
+    artists.forEach(function(item) {
+        artistsLabels.push(item[0]);
+        artistsData.push(item[1]);
+    });
+
+    // Chart for Top Genres
+    var ctx = document.getElementById('genresChart').getContext('2d');
+    var genresChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: genresLabels,
+            datasets: [{
+                label: 'Number of Tracks',
+                data: genresData,
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgba(75, 192, 192,1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Chart for Top Artists
+    var ctx2 = document.getElementById('artistsChart').getContext('2d');
+    var artistsChart = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+            labels: artistsLabels,
+            datasets: [{
+                label: 'Number of Tracks',
+                data: artistsData,
+                backgroundColor: 'rgba(153, 102, 255, 0.6)',
+                borderColor: 'rgba(153, 102, 255, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+
+<div style="margin-top: 20px;">
+    <a href="{% url 'select_playlist' %}" class="button">Back to Playlists</a>
+</div>
+{% endblock %}

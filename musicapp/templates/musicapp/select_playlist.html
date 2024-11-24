@@ -28,6 +28,7 @@
             {% for playlist in playlists %}
                 <li>
                     <a href="{% url 'playlist_detail' playlist.id %}">{{ playlist.name }}</a>
+                    <a href="{% url 'playlist_analytics' playlist.id %}">View Analytics</a>
                 </li>
             {% endfor %}
         </ul>
