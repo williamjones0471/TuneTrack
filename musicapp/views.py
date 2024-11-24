@@ -26,7 +26,7 @@ def callback(request):
         client_id=settings.SPOTIFY_CLIENT_ID,
         client_secret=settings.SPOTIFY_CLIENT_SECRET,
         redirect_uri=settings.SPOTIFY_REDIRECT_URI,
-        scope='user-top-read user-read-recently-played playlist-modify-private playlist-modify-public user-read-private user-read-email',
+        scope=settings.SPOTIFY_SCOPE,
         cache_path=None
     )
     code = request.GET.get('code')
@@ -151,7 +151,7 @@ def home(request):
         client_id=settings.SPOTIFY_CLIENT_ID,
         client_secret=settings.SPOTIFY_CLIENT_SECRET,
         redirect_uri=settings.SPOTIFY_REDIRECT_URI,
-        scope='playlist-modify-private playlist-modify-public user-read-private user-read-recently-played',
+        scope=settings.SPOTIFY_SCOPE,
         cache_path=None,
     )
 
@@ -228,7 +228,7 @@ def spotify_login(request):
         client_id=settings.SPOTIFY_CLIENT_ID,
         client_secret=settings.SPOTIFY_CLIENT_SECRET,
         redirect_uri=settings.SPOTIFY_REDIRECT_URI,
-        scope='user-top-read user-read-recently-played playlist-modify-private playlist-modify-public user-read-private user-read-email',
+        scope=settings.SPOTIFY_SCOPE,
         cache_path=None
     )
     auth_url = sp_oauth.get_authorize_url()
@@ -424,7 +424,7 @@ def analytics(request):
         client_id=settings.SPOTIFY_CLIENT_ID,
         client_secret=settings.SPOTIFY_CLIENT_SECRET,
         redirect_uri=settings.SPOTIFY_REDIRECT_URI,
-        scope='user-top-read user-read-recently-played',
+        scope=settings.SPOTIFY_SCOPE,
         cache_path=None
     )
 

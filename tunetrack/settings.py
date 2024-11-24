@@ -35,6 +35,7 @@ SPOTIFY_REDIRECT_URI = os.getenv('SPOTIPY_REDIRECT_URI')
 # SECRET_KEY = "django-insecure-g&=s5pa5@v^ue5g$r81(#ucg6a1*&icmiirmg4=@c(l3snbw7&"
 SECRET_KEY = os.getenv('SECRET_KEY')
 
+SPOTIFY_SCOPE = 'user-top-read user-read-recently-played playlist-read-private playlist-modify-private playlist-modify-public user-read-private user-read-email user-library-read'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
