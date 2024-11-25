@@ -112,9 +112,11 @@
     </head>
     <body>
         <div class="navbar">
-            <a class="nav-link" href="{% url 'home' %}">Home</a>
-            <a class="nav-link" href="{% url 'select_playlist' %}">Back to Playlists</a>
-            <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+            <nav>
+                <a class="nav-link" href="{% url 'home' %}">Home</a>
+                <a class="nav-link" href="{% url 'select_playlist' %}">Back to Playlists</a>
+                <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+            </nav>
         </div>
 
         <hr>
