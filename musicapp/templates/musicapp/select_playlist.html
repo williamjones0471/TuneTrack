@@ -1,36 +1,233 @@
 {% load static %}
 
+{% block body %}
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-        <link rel="stylesheet" href="{% static 'musicapp/styles.css' %}">
         <title>Select Playlist</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+        <style>
+            /* General Reset */
+            body {
+                margin: 0;
+                padding: 0;
+                font-family: 'Inter', sans-serif;
+                background: linear-gradient(135deg, #1db954, #121212);
+                color: white;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+
+            /* Navigation Bar */
+            .navbar {
+                background: rgba(0, 0, 0, 0.8);
+                padding: 15px 20px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+            }
+
+            .navbar a {
+                color: white;
+                text-decoration: none;
+                font-size: 1rem;
+                font-weight: 500;
+                transition: color 0.3s ease;
+            }
+
+            .navbar a:hover {
+                color: #1db954;
+            }
+
+            .navbar .logo {
+                font-size: 1.5rem;
+                font-weight: 700;
+            }
+
+            /* Main Container */
+            .container {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 20px;
+            }
+
+            /* Playlist List Section */
+            .playlist-list {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 20px;
+                justify-content: center;
+                margin-top: 30px;
+            }
+
+            /* Playlist Card Layout */
+            .playlist-card {
+                display: flex;
+                align-items: center;
+                background: rgba(0, 0, 0, 0.8);
+                padding: 15px;
+                border-radius: 12px;
+                box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+                gap: 15px;
+                width: 100%;
+                max-width: 600px;
+                min-width: 600px;
+                height: 120px;
+                margin-bottom: 20px;
+                transition: transform 0.3s ease, background 0.3s ease;
+            }
+
+            .playlist-card:hover {
+                transform: translateY(-5px);
+                /* background: rgba(29, 185, 84, 0.9); */
+            }
+
+            /* Playlist Artwork */
+            .playlist-art img {
+                width: 80px;
+                height: 80px;
+                border-radius: 10px;
+                object-fit: cover;
+            }
+
+            /* Playlist Info */
+            .playlist-info {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                gap: 10px;
+                overflow: hidden; /* Ensures overflowing content is hidden */
+            }
+
+            /* Playlist Title */
+            .playlist-info h3 {
+                margin: 0;
+                font-size: 1.2rem;
+                color: white;
+                white-space: nowrap; /* Prevents text wrapping */
+                overflow: hidden; /* Hides overflow text */
+                text-overflow: ellipsis; /* Adds ellipsis (...) for long text */
+            }
+
+            /* Button Group */
+            .button-group {
+                display: flex;
+                gap: 10px;
+            }
+
+            /* Buttons */
+            .button-group button {
+                background: none;
+                border: 2px solid #1db954;
+                border-radius: 20px;
+                color: white;
+                padding: 10px 15px;
+                font-size: 0.9rem;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                flex: 1; /* Makes the buttons evenly spaced */
+                text-align: center;
+            }
+
+            .button-group button:hover {
+                background: #1db954;
+                color: black;
+            }
+
+
+            /* Buttons */
+            .button-group button {
+                background: none;
+                border: 2px solid #1db954;
+                border-radius: 20px;
+                color: white;
+                padding: 10px 15px;
+                font-size: 0.9rem;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                flex: 1; /* Makes the buttons evenly spaced */
+                text-align: center;
+            }
+
+            .button-group button:hover {
+                background: #1db954;
+                color: black;
+            }
+            /* Action Buttons */
+            .action-buttons {
+                margin-top: 40px;
+                display: flex;
+                gap: 20px;
+            }
+
+            .action-buttons button {
+                padding: 12px 20px;
+                font-size: 1.2rem;
+                color: white;
+                background: #1db954;
+                border: none;
+                border-radius: 25px;
+                cursor: pointer;
+                transition: background 0.3s ease;
+            }
+
+            .action-buttons button:hover {
+                background: #1aa34a;
+            }
+        </style>
     </head>
     <body>
-        <div>
-            <ul class="nav">
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'home' %}">Home</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'logout' %}">Logout</a>
-                </li>
-            </ul>
+        <div class="navbar">
+            <nav>
+                <a class="nav-link" href="{% url 'home' %}">Home</a>
+                <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+            </nav>
         </div>
 
         <hr>
 
-        <h1>Select a Playlist:</h1>
-        <ul>
-            {% for playlist in playlists %}
-                <li>
-                    <a href="{% url 'playlist_detail' playlist.id %}">{{ playlist.name }}</a>
-                    <a href="{% url 'playlist_analytics' playlist.id %}">View Analytics</a>
-                </li>
-            {% endfor %}
-        </ul>
+        <div class="container">
+            <h1>Select a Playlist</h1>
+                {% for playlist in playlist_info %}
+                    <div class="playlist-list">
+                        <div class="playlist-card">
+                            <div class="playlist-art">
+                                <img src="{{ playlist.image_url }}" alt="Playlist Image" />
+                            </div>
+                            <div class="playlist-info">
+                                <h3>{{ playlist.name }}</h3>
+                                <div class="button-group">
+                                    <button data-playlist-id="{{ playlist.id }}" onclick="redirectToContents(event)">View Contents</button>
+                                    <button data-playlist-id="{{ playlist.id }}" onclick="redirectToAnalytics(event)">View Analytics</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+        </div>
+
+        <script>
+            function redirectToContents(event) {
+                const buttonElement = event.currentTarget;
+                const playlistId = buttonElement.getAttribute('data-playlist-id');
+                window.location.href = `/playlist/${playlistId}`;
+            }
+
+            function redirectToAnalytics(event) {
+                const buttonElement = event.currentTarget;
+                const playlistId = buttonElement.getAttribute('data-playlist-id');
+                window.location.href = `/playlist/${playlistId}/analytics`;
+            }
+        </script>
     </body>
 </html>
+
+{% endblock %}

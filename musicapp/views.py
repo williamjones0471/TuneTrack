@@ -348,10 +348,20 @@ def select_playlist(request):
     access_token = token_info.get('access_token')
     sp = spotipy.Spotify(auth=access_token)
 
-    playlists = sp.current_user_playlists()  # Fetch user playlists
+    playlists = sp.current_user_playlists() 
+    playlist_info = []
+
+    for playlist in playlists['items']:
+        playlist_data = {
+            'id': playlist['id'],
+            'name': playlist['name'],
+            'image_url': playlist['images'][0]['url'] if playlist['images'] else None,  # Fetch cover image URL
+        }
+        playlist_info.append(playlist_data)
+    
 
     return render(request, 'musicapp/select_playlist.html', {
-        'playlists': playlists['items'],  # Pass playlists to the template
+        'playlist_info': playlist_info,
     })
 
 def playlist_detail(request, playlist_id):
