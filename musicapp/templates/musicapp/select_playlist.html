@@ -20,16 +20,24 @@
                 min-height: 100vh;
                 display: flex;
                 flex-direction: column;
+                background-size: 110%
             }
 
             /* Navigation Bar */
             .navbar {
-                background: rgba(0, 0, 0, 0.8);
-                padding: 15px 20px;
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
+                padding: 15px 40px;
+                background: rgba(0, 0, 0, 0.8);
                 box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+            }
+
+            /* Navigation Links Container */
+            .navbar nav {
+                display: flex;
+                justify-content: flex-end;
+                gap: 30px; 
             }
 
             .navbar a {
@@ -38,6 +46,11 @@
                 font-size: 1rem;
                 font-weight: 500;
                 transition: color 0.3s ease;
+            }
+
+            .navbar .logout {
+                display: flex;
+                justify-content: end;
             }
 
             .navbar a:hover {
@@ -161,35 +174,14 @@
                 background: #1db954;
                 color: black;
             }
-            /* Action Buttons */
-            .action-buttons {
-                margin-top: 40px;
-                display: flex;
-                gap: 20px;
-            }
-
-            .action-buttons button {
-                padding: 12px 20px;
-                font-size: 1.2rem;
-                color: white;
-                background: #1db954;
-                border: none;
-                border-radius: 25px;
-                cursor: pointer;
-                transition: background 0.3s ease;
-            }
-
-            .action-buttons button:hover {
-                background: #1aa34a;
-            }
         </style>
     </head>
     <body>
         <div class="navbar">
             <nav>
                 <a class="nav-link" href="{% url 'home' %}">Home</a>
-                <a class="nav-link" href="{% url 'logout' %}">Logout</a>
             </nav>
+                <a class="logout" href="{% url 'logout' %}">Logout</a>
         </div>
 
         <hr>

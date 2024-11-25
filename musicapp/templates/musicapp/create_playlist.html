@@ -22,12 +22,19 @@
 
             /* Navigation Bar */
             .navbar {
-                background: rgba(0, 0, 0, 0.8);
-                padding: 15px 20px;
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
+                padding: 15px 40px;
+                background: rgba(0, 0, 0, 0.8);
                 box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+            }
+
+            /* Navigation Links Container */
+            .navbar nav {
+                display: flex;
+                justify-content: flex-end;
+                gap: 30px; 
             }
 
             .navbar a {
@@ -36,6 +43,11 @@
                 font-size: 1rem;
                 font-weight: 500;
                 transition: color 0.3s ease;
+            }
+
+            .navbar .logout{
+                display: flex;
+                justify-content: end;
             }
 
             .navbar a:hover {
@@ -115,8 +127,8 @@
             <nav>
                 <a class="nav-link" href="{% url 'home' %}">Home</a>
                 <a class="nav-link" href="{% url 'select_playlist' %}">Back to Playlists</a>
-                <a class="nav-link" href="{% url 'logout' %}">Logout</a>
             </nav>
+            <a class="logout" href="{% url 'logout' %}">Logout</a>
         </div>
 
         <hr>
