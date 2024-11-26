@@ -5,6 +5,12 @@ changed or fixed feel free to go ahead and do so, I am sort of learning Django a
 10/19/2024 -
 William: To run the server you have to use the command: python manage.py runserver 0.0.0.0:8000
 
+**THINGS LEFT TO STILL ADD**
+1. Make sure front end looks good and consistent
+2. Implement music recommendation advanced function (overall and per playlist)
+3. Clean up music data analytics function?
+4. Make sure that the flow of the we app is working properly (ie. not getting stuck with the wrong account, making sure the appropriate pages can get back to the home screen, etc...)
+
 To get codespaces set up:
 1. Create a codespace on main
 2. Clone the repo:
