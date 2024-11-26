@@ -54,7 +54,6 @@ def callback(request):
         try:
             user = User.objects.get(username=user_display_name)
 
-            print(user, 'USERDSF:JKL')
             if user:
                 return HttpResponseRedirect(reverse('returning_user'))
         except ObjectDoesNotExist:
@@ -156,10 +155,6 @@ def home(request):
         cache_path=None,
     )
 
-
-
-    
-    
       # Check if token is expired
     if sp_oauth.is_token_expired(token_info):
         try:
@@ -197,21 +192,46 @@ def home(request):
                 print(top_tracks)
         except Exception as e:
             print(f"Error searching for artist: {e}")
-            artists = []
     else:
-        try:
-            # Fetch general data from Spotify (e.g., search for artists)
-            results = sp.search(q='artist:Coldplay', type='artist')
-            artists = results['artists']['items']
+        artists = []
+        seed_artists = []
+        seed_genres = []
 
-            print(dir(sp))
+        try:
+            top_artists_data = sp.current_user_top_artists(limit=2, time_range='long_term')
+
+            seed_artists = [items['id'] for items in top_artists_data['items']]
+
+            for items in top_artists_data['items']:
+                for genre in items['genres']:
+                    if len(seed_genres) < 3:
+                        seed_genres.append(genre)
+
+            recommendations = sp.recommendations(limit=10, seed_artists=seed_artists, seed_genres=seed_genres)
+            song_info = []
+            artist_info = []
+
+            print("\n\n", seed_artists, seed_genres, "\n\n")
+
+            for recommendation in recommendations['tracks']:
+                song_info.append(recommendation)
+                artist_info.append(recommendation['album']['artists'][0])
+
         except Exception as e:
-            print(f"Error fetching default artist: {e}")
-            artists = []
+            print(f"Error fetching user's top artists or tracks: {e}")
+            return render(request, "musicapp/home.html", {
+                'user': user_display_name,
+                "message": "Unable to Get Recommendations.",
+            })
+
+
+        # zipped_data = zip(song_info, artist_info)
 
     return render(request, 'musicapp/home.html', {
         'user': user_display_name,
-        'artists': artists,
+        'song_info': song_info,
+        'artist_info': artist_info,
+        'recommendations': recommendations['tracks']
     })
 
 def logout_view(request):
@@ -379,6 +399,9 @@ def playlist_detail(request, playlist_id):
         playlist = sp.playlist(playlist_id)
         songs = playlist['tracks']['items']
 
+        for song in songs:
+            print()
+
         # Prepare data for the template
         playlist_data = {
             'name': playlist['name'],
@@ -388,7 +411,8 @@ def playlist_detail(request, playlist_id):
                     'id': song['track']['id'],  # Ensure we are including the song ID
                     'title': song['track']['name'],
                     'artist_name': ', '.join([artist['name'] for artist in song['track']['artists']]),
-                    'duration': song['track']['duration_ms'] // 1000
+                    'duration': song['track']['duration_ms'] // 1000,
+                    'image_url': song['track']['album']['images'][0]['url']
                 } for song in songs if song['track']
             ],
         }
@@ -420,7 +444,7 @@ def delete_song_from_playlist(request, playlist_id, song_id):
         return render(request, 'musicapp/error.html', {'message': 'Failed to remove song from playlist.'})
 
     # Redirect back to the playlist detail page after successful deletion
-    return redirect('search_songs', playlist_id=playlist_id)
+    return redirect('playlist_detail', playlist_id=playlist_id)
 
 @login_required
 def analytics(request):

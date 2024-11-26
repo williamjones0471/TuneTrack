@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
   </head>
-  <body>
+  <body style="background-color: black; color: white;">
     {% block content %}
       <h1>Welcome, {{ user }}</h1>
       <form method="post">
@@ -15,6 +15,11 @@
         <input type="text" name="artist" placeholder="Search for an artist">
         <button type="submit">Search</button>
       </form>
+
+      {% if message %}
+        <p>{{ message }}</p>
+      {% endif %}
+
       {% if artists %}
         <h2>Artists:</h2>
         <ul>
@@ -22,6 +27,14 @@
             <li>{{ artist.name }}</li>
           {% endfor %}
         </ul>
+      {% endif %}
+
+      {% if song_info %}
+        {% for song in song_info %} {% for artist in artist_info %}
+          {% if forloop.counter == forloop.parentloop.counter %}
+            <p>{{ song.name }} by {{ artist.name }}</p>
+          {% endif %}
+        {% endfor %} {% endfor %}
       {% endif %}
     {% endblock %}
   </body>
