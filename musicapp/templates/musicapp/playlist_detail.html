@@ -1,56 +1,237 @@
 {% load static %}
 
+{% block body %}
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-        <link rel="stylesheet" href="{% static 'musicapp/styles.css' %}">
-        <title>Playlist Detail</title>
+        <title>Select Playlist</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+        <style>
+            /* General Reset */
+            body {
+                margin: 0;
+                padding: 0;
+                font-family: 'Inter', sans-serif;
+                background: linear-gradient(135deg, #1db954, #121212);
+                color: white;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                background-size: 110%
+            }
+
+            /* Navigation Bar */
+            .navbar {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 15px 40px;
+                background: rgba(0, 0, 0, 0.8);
+                box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+            }
+
+            /* Navigation Links Container */
+            .navbar nav {
+                display: flex;
+                justify-content: flex-end;
+                gap: 30px; 
+            }
+
+            .navbar a {
+                color: white;
+                text-decoration: none;
+                font-size: 1rem;
+                font-weight: 500;
+                transition: color 0.3s ease;
+            }
+
+            .navbar .logout {
+                display: flex;
+                justify-content: end;
+            }
+
+            .navbar a:hover {
+                color: #1db954;
+            }
+
+            .navbar .logo {
+                font-size: 1.5rem;
+                font-weight: 700;
+            }
+
+            /* Main Container */
+            .container {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 20px;
+            }
+
+            /* Playlist List Section */
+            .playlist-list {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 20px;
+                justify-content: center;
+                margin-top: 30px;
+            }
+
+            /* Playlist Card Layout */
+            .playlist-card {
+                display: flex;
+                align-items: center;
+                background: rgba(0, 0, 0, 0.8);
+                padding: 15px;
+                border-radius: 12px;
+                box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+                gap: 15px;
+                width: 100%;
+                max-width: 600px;
+                min-width: 600px;
+                height: 120px;
+                margin-bottom: 20px;
+                transition: transform 0.3s ease, background 0.3s ease;
+            }
+
+            .playlist-card:hover {
+                transform: translateY(-5px);
+                /* background: rgba(29, 185, 84, 0.9); */
+            }
+
+            /* Playlist Artwork */
+            .playlist-art img {
+                width: 80px;
+                height: 80px;
+                border-radius: 10px;
+                object-fit: cover;
+            }
+
+            /* Playlist Info */
+            .playlist-info {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                gap: 10px;
+                overflow: hidden; /* Ensures overflowing content is hidden */
+            }
+
+            /* Playlist Title */
+            .playlist-info h3 {
+                margin: 0;
+                font-size: 1.2rem;
+                color: white;
+                white-space: nowrap; /* Prevents text wrapping */
+                overflow: hidden; /* Hides overflow text */
+                text-overflow: ellipsis; /* Adds ellipsis (...) for long text */
+            }
+
+            /* Button Group */
+            .button-group {
+                display: flex;
+                gap: 10px;
+            }
+
+            /* Buttons */
+            .button-group button {
+                background: none;
+                border: 2px solid #1db954;
+                border-radius: 20px;
+                color: white;
+                padding: 10px 15px;
+                font-size: 0.9rem;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                flex: 1; /* Makes the buttons evenly spaced */
+                text-align: center;
+            }
+
+            .button-group button:hover {
+                background: #1db954;
+                color: black;
+            }
+
+
+            /* Buttons */
+            .button-group button {
+                background: none;
+                border: 2px solid #1db954;
+                border-radius: 20px;
+                color: white;
+                padding: 10px 15px;
+                font-size: 0.9rem;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                flex: 1; /* Makes the buttons evenly spaced */
+                text-align: center;
+            }
+
+            .button-group button:hover {
+                background: #1db954;
+                color: black;
+            }
+
+            .duration {
+                color:hsl(0, 0%, 60%)
+            }
+        </style>
     </head>
     <body>
-        <div>
-            <ul class="nav">
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'home' %}">Home</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'select_playlist' %}">Back to Playlists</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'search_songs' playlist_id %}">Add Songs</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'logout' %}">Logout</a>
-                </li>
-            </ul>
+        <div class="navbar">
+            <nav>
+                <a href="{% url 'home' %}">Home</a>
+                <a href="{% url 'select_playlist' %}">Back to Playlists</a>
+                <a href="{% url 'search_songs' playlist_id %}">Add Songs</a>
+            </nav>
+                <a class="logout" href="{% url 'logout' %}">Logout</a>
         </div>
 
         <hr>
 
-        <div class="playlist_detail">
-            <h1>Playlist: {{ playlist.name }}</h1>
-            <p><strong>Description:</strong> {{ playlist.description }}</p>
+        <div class="container">
+            <div class="playlist_detail">
+                <h1>Playlist: {{ playlist.name }}</h1>
 
-            <h2>Songs in Playlist</h2>
-            <ul>
+                {% if playlist.description == "" %}
+                    <p>Description: None</p>
+                {% else %}
+                    <p>Description: {{ playlist.description }}</p>
+                {% endif %}
+    
+                <h2>Songs</h2>
+
                 {% if playlist.songs %}
                     {% for song in playlist.songs %}
-                        <li>
-                            <strong>{{ song.title }}</strong> by {{ song.artist_name }}
-                            <span>(Duration: {{ song.duration }} seconds)</span>
+                        <div class="playlist-list">
+                            <div class="playlist-card">
+                                <div class="playlist-art">
+                                    <img src="{{ song.image_url }}" alt="Song Image" />
+                                </div>
+                                <div class="playlist-info">
+                                    {{ song.title }} by {{ song.artist_name }}
+                                    <span class="duration">(Duration: {{ song.duration }} seconds)</span>
 
-                            <form method="post" action="{% url 'delete_song_from_playlist' playlist_id song.id %}">
-                                {% csrf_token %}
-                                <button type="submit">Delete</button>
-                            </form>
-                        </li>
+                                    <form method="post" action="{% url 'delete_song_from_playlist' playlist_id song.id %}">
+                                        {% csrf_token %}
+                                        <div class="button-group">
+                                            <button type="submit">Delete</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>    
+                        </div>            
                     {% endfor %}
                 {% else %}
                     <li>No songs found in this playlist.</li>
                 {% endif %}
-            </ul>
+
+            </div>
         </div>
     </body>
 </html>
+
+{% endblock %}
