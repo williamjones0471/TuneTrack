@@ -10,6 +10,7 @@ from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.cache import cache
 import json
+import os
 
 import spotipy
 import spotipy.util as util
@@ -236,12 +237,17 @@ def home(request):
 
 def logout_view(request):
     # Clear the session data
+    cache.clear()
     request.session.flush()
+
+    os.remove("/workspaces/TuneTrack/.cache")
     # Log out the user
     logout(request)
     return redirect('logout_confirmation')
 
 def logout_confirmation(request):
+    cache.clear()
+    request.session.flush()
     return render(request, 'musicapp/logout_confirmation.html')
 
 def spotify_login(request):

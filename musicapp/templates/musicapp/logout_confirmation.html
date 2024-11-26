@@ -1,6 +1,39 @@
 {% block content %}
-  <h1>You have been logged out of TuneTrack</h1>
-  <p>You are still logged into Spotify. If you wish to log out of Spotify as well, please click the link below.</p>
-  <a href="https://www.spotify.com/logout/">Log out of Spotify</a>
-  <p><a href="{% url 'login' %}">Return to Login Page</a></p>
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Logout Confirmation</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+        <style>
+            body {
+                margin: 0;
+                padding: 0;
+                font-family: 'Inter', sans-serif;
+                background: linear-gradient(135deg, #1db954, #121212);
+                color: white;
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                flex-direction: column;
+                background-size: 110%
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Logout Successful!</h1>
+
+        <script>
+          document.addEventListener("DOMContentLoaded", load)
+          
+          function load(){
+              alert("Redirecting to https://www.spotify.com/logout/ to log you out of spotify")
+              window.location.href = `https://www.spotify.com/logout/`;
+              console.log("RAN")
+          }
+        </script>
+    </body>
+</html>
 {% endblock %}
