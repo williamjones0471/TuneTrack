@@ -1,93 +1,139 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+ <head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Document</title>
+   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 
-    <style>
-        body {
-                margin: 0;
-                padding: 0;
-                font-family: 'Inter', sans-serif;
-                background: linear-gradient(135deg, #1db954, #121212);
-                color: white;
-                min-height: 100vh;
-                display: flex;
-                flex-direction: column;
-                background-size: 110%
-            }
 
-            /* Navigation Bar */
-            .navbar {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 15px 40px;
-                background: rgba(0, 0, 0, 0.8);
-                box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
-            }
+   <style>
+       body {
+               margin: 0;
+               padding: 0;
+               font-family: 'Inter', sans-serif;
+               background: linear-gradient(to bottom, #1db954, #121212);
+               color: white;
+               min-height: 100vh;
+               display: flex;
+               flex-direction: column;
+               background-size: 110%
+           }
 
-            /* Navigation Links Container */
-            .navbar nav {
-                display: flex;
-                justify-content: flex-end;
-                gap: 30px; 
-            }
 
-            .navbar a {
-                color: white;
-                text-decoration: none;
-                font-size: 1rem;
-                font-weight: 500;
-                transition: color 0.3s ease;
-            }
+           /* Navigation Bar */
+           .navbar {
+               display: flex;
+               justify-content: space-between;
+               align-items: center;
+               padding: 15px 40px;
+               background: rgba(0, 0, 0, 0.8);
+               box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+           }
 
-            .navbar .logout {
-                display: flex;
-                justify-content: end;
-            }
 
-            .navbar a:hover {
-                color: #1db954;
-            }
+           /* Navigation Links Container */
+           .navbar nav {
+               display: flex;
+               justify-content: flex-end;
+               gap: 30px;
+           }
 
-            .navbar .logo {
-                font-size: 1.5rem;
-                font-weight: 700;
-            }
-    </style>
-  </head>
-  <body>
-    {% block content %}
-    <div class="navbar">
-        <nav>
-            <a href="{% url 'home' %}">Home</a>
-            <a href="{% url 'create_playlist' %}">Create New Playlist</a>
-            <a href="{% url 'select_playlist' %}">Playlists</a>
-            <a href="{% url 'analytics' %}">Analytics</a>
-        </nav>
 
-            <a class="logout" href="{% url 'logout' %}">Logout</a>
-        
-    </div>
+           .navbar a {
+               color: white;
+               text-decoration: none;
+               font-size: 1rem;
+               font-weight: 500;
+               transition: color 0.3s ease;
+           }
 
-    <hr>
 
-        <h1>Welcome, {{ user }}</h1>
+           .navbar .logout {
+               display: flex;
+               justify-content: end;
+           }
 
-        {% if message %}
-            <p>{{ message }}</p>
-        {% endif %}
 
-        {% if song_info %}
-            {% for song in song_info %} {% for artist in artist_info %}
-                {% if forloop.counter == forloop.parentloop.counter %}
-                <p>{{ song.name }} by {{ artist.name }}</p>
-                {% endif %}
-            {% endfor %} {% endfor %}
-        {% endif %}
-    {% endblock %}
-  </body>
+           .navbar a:hover {
+               color: #1db954;
+           }
+
+
+           .navbar .logo {
+               font-size: 1.5rem;
+               font-weight: 700;
+           }
+
+
+           .center-content {
+               flex: 1;
+               display: flex;
+               flex-direction: column;
+               justify-content: center;
+               align-items: center;
+               text-align: center;
+           }
+
+
+           .center-content h1{
+               font-size: 4rem;
+               font-weight: bold;
+               color: #fff;
+               text-shadow: 0 4px 10px rgba(0, 0, 0, 0.6),
+                            0 0 15px #1db954,
+                            0 0 20px #1db954;
+               opacity: 0;
+               animation: fadeIn 2s ease-in forwards;
+           }
+
+
+           @keyframes fadeIn{
+               0% {
+                   opacity: 0;
+                   trasnform: translateY(20px);
+               }
+               100%{
+                   opacity: 1;
+                   transform: translateY(0);
+               }
+           }
+          
+   </style>
+ </head>
+ <body>
+   {% block content %}
+   <div class="navbar">
+       <nav>
+           <a href="{% url 'home' %}">Home</a>
+           <a href="{% url 'create_playlist' %}">Create New Playlist</a>
+           <a href="{% url 'select_playlist' %}">Playlists</a>
+           <a href="{% url 'analytics' %}">Analytics</a>
+       </nav>
+
+
+           <a class="logout" href="{% url 'logout' %}">Logout</a>
+      
+   </div>
+
+
+   <hr>
+
+
+   <div class="center-content">
+       <h1>Welcome, {{ user }}</h1>
+       {% if message %}
+           <p>{{ message }}</p>
+       {% endif %}
+   </div>
+       {% if song_info %}
+           {% for song in song_info %} {% for artist in artist_info %}
+               {% if forloop.counter == forloop.parentloop.counter %}
+               <p>{{ song.name }} by {{ artist.name }}</p>
+               {% endif %}
+           {% endfor %} {% endfor %}
+       {% endif %}
+   {% endblock %}
+ </body>
 </html>
+
