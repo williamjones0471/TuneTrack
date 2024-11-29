@@ -377,13 +377,16 @@ def select_playlist(request):
     playlists = sp.current_user_playlists() 
     playlist_info = []
 
-    for playlist in playlists['items']:
-        playlist_data = {
-            'id': playlist['id'],
-            'name': playlist['name'],
-            'image_url': playlist['images'][0]['url'] if playlist['images'] else None,  # Fetch cover image URL
-        }
-        playlist_info.append(playlist_data)
+    try: 
+        for playlist in playlists['items']:
+            playlist_data = {
+                'id': playlist['id'],
+                'name': playlist['name'],
+                'image_url': playlist['images'][0]['url'] if playlist['images'] else None,  # Fetch cover image URL
+            }
+            playlist_info.append(playlist_data)
+    except:
+        pass
     
 
     return render(request, 'musicapp/select_playlist.html', {
