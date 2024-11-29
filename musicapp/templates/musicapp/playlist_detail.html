@@ -175,6 +175,49 @@
                 color: black;
             }
 
+            .add-button-group {
+                display: flex;
+                gap: 10px;
+            }
+
+            .add-button-group button {
+                background: none;
+                border: 2px solid #1db954;
+                border-radius: 20px;
+                color: white;
+                padding: 10px 15px;
+                font-size: 0.9rem;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                flex: 1; /* Makes the buttons evenly spaced */
+                text-align: center;
+            }
+
+            .add-button-group button:hover {
+                background: #1db954;
+                color: black;
+            }
+
+
+            /* Buttons */
+            .add-button-group button {
+                background: none;
+                border: 2px solid #1db954;
+                border-radius: 20px;
+                color: white;
+                padding: 10px 15px;
+                font-size: 0.9rem;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                flex: 1; /* Makes the buttons evenly spaced */
+                text-align: center;
+            }
+
+            .add-button-group button:hover {
+                background: #1db954;
+                color: black;
+            }
+
             .duration {
                 color:hsl(0, 0%, 60%)
             }
@@ -201,8 +244,25 @@
                 {% else %}
                     <p>Description: {{ playlist.description }}</p>
                 {% endif %}
-    
+
                 <h2>Songs</h2>
+
+                <div class="playlist-card">
+                    <div class="add-art">
+                        <img src="" alt="Plus Sign" />
+                    </div>
+                    <div class="playlist-info">
+                        Add Songs
+                        <span class="duration">  .      </span>
+
+                        <form method="post" action="{% url 'search_songs' playlist_id %}">
+                            {% csrf_token %}
+                            <div class="add-button-group">
+                                <button type="submit">+</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
 
                 {% if playlist.songs %}
                     {% for song in playlist.songs %}
@@ -225,10 +285,7 @@
                             </div>    
                         </div>            
                     {% endfor %}
-                {% else %}
-                    <li>No songs found in this playlist.</li>
                 {% endif %}
-
             </div>
         </div>
     </body>
