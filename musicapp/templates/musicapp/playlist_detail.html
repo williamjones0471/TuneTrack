@@ -139,7 +139,7 @@
             /* Buttons */
             .button-group button {
                 background: none;
-                border: 2px solid #1db954;
+                border: 2px solid rgb(195, 28, 28);
                 border-radius: 20px;
                 color: white;
                 padding: 10px 15px;
@@ -151,7 +151,7 @@
             }
 
             .button-group button:hover {
-                background: #1db954;
+                background: rgb(195, 28, 28);
                 color: black;
             }
 
@@ -159,7 +159,7 @@
             /* Buttons */
             .button-group button {
                 background: none;
-                border: 2px solid #1db954;
+                border: 2px solid rgb(195, 28, 28);
                 border-radius: 20px;
                 color: white;
                 padding: 10px 15px;
@@ -171,7 +171,7 @@
             }
 
             .button-group button:hover {
-                background: #1db954;
+                background: rgb(195, 28, 28);
                 color: black;
             }
 
@@ -212,13 +212,13 @@
                                     <img src="{{ song.image_url }}" alt="Song Image" />
                                 </div>
                                 <div class="playlist-info">
-                                    {{ song.title }} by {{ song.artist_name }}
+                                    {{ song.title }} - {{ song.artist_name }}
                                     <span class="duration">(Duration: {{ song.duration }} seconds)</span>
 
                                     <form method="post" action="{% url 'delete_song_from_playlist' playlist_id song.id %}">
                                         {% csrf_token %}
                                         <div class="button-group">
-                                            <button type="submit">Delete</button>
+                                            <button type="submit">Remove</button>
                                         </div>
                                     </form>
                                 </div>
