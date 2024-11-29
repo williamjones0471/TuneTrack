@@ -104,9 +104,12 @@
 
             /* Playlist Artwork */
             .playlist-art img {
-                width: 80px;
-                height: 80px;
+                width: 90px;
+                height: 90px;
+                max-width: 90px;
+                max-height: 90px;
                 border-radius: 10px;
+                overflow: hidden;
                 object-fit: cover;
             }
 
@@ -192,7 +195,7 @@
                     <div class="playlist-list">
                         <div class="playlist-card">
                             <div class="playlist-art">
-                                <img src="{{ playlist.image_url }}" alt="Playlist Image" />
+                                <img src="{{ playlist.image_url }}" alt="Playlist Img" />
                             </div>
                             <div class="playlist-info">
                                 <h3>{{ playlist.name }}</h3>
