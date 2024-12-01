@@ -110,6 +110,13 @@
                 object-fit: cover;
             }
 
+            .add-art img {
+                width: 80px;
+                height: 80px;
+                border-radius: 10px;
+                object-fit: cover;
+            }
+
             /* Playlist Info */
             .playlist-info {
                 flex: 1;
@@ -221,6 +228,16 @@
             .duration {
                 color:hsl(0, 0%, 60%)
             }
+
+            .add-songs-text {
+                font-weight: bolder;
+                font-size: 20px;
+                line-height: 20%;
+            }
+
+            .playlist-title {
+                text-align: center;
+            }
         </style>
     </head>
     <body>
@@ -228,7 +245,6 @@
             <nav>
                 <a href="{% url 'home' %}">Home</a>
                 <a href="{% url 'select_playlist' %}">Back to Playlists</a>
-                <a href="{% url 'search_songs' playlist_id %}">Add Songs</a>
             </nav>
                 <a class="logout" href="{% url 'logout' %}">Logout</a>
         </div>
@@ -237,24 +253,15 @@
 
         <div class="container">
             <div class="playlist_detail">
-                <h1>Playlist: {{ playlist.name }}</h1>
 
-                {% if playlist.description == "" %}
-                    <p>Description: None</p>
-                {% else %}
-                    <p>Description: {{ playlist.description }}</p>
-                {% endif %}
-
-                <h2>Songs</h2>
+                <h1 class="playlist-title">Playlist: {{ playlist.name }}</h1>
 
                 <div class="playlist-card">
                     <div class="add-art">
-                        <img src="" alt="Plus Sign" />
+                        <img src="{% static 'plus_sign.jpg' %}">
                     </div>
                     <div class="playlist-info">
-                        Add Songs
-                        <span class="duration">  .      </span>
-
+                        <p class="add-songs-text">Add Songs</p>
                         <form method="post" action="{% url 'search_songs' playlist_id %}">
                             {% csrf_token %}
                             <div class="add-button-group">
@@ -273,7 +280,7 @@
                                 </div>
                                 <div class="playlist-info">
                                     {{ song.title }} - {{ song.artist_name }}
-                                    <span class="duration">(Duration: {{ song.duration }} seconds)</span>
+                                    <span class="duration">Duration: {{ song.duration }} seconds</span>
 
                                     <form method="post" action="{% url 'delete_song_from_playlist' playlist_id song.id %}">
                                         {% csrf_token %}
