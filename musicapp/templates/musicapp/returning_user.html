@@ -105,14 +105,14 @@
     
 </body>
 </html>
-    {% if message %}
-    <div class="alert-info">
-        {{ message }}
-    </div>
-    {% endif %}
-
     <div class="container">
         <h1>Welcome Back, {{ user }}:</h1>
+
+        {% if message %}
+            <div class="alert-info">
+                {{ message }}
+            </div>
+        {% endif %}
   
         <form method="post">
             {% csrf_token %}
