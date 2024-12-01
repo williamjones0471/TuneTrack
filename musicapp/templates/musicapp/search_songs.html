@@ -1,282 +1,287 @@
 {% load static %}
 
-
 <!DOCTYPE html>
 <html lang="en">
    <head>
        <meta charset="UTF-8">
        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-       <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-       <link rel="stylesheet" href="{% static 'musicapp/styles.css' %}"> -->
        <title>Add Songs</title>
        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-       <link rel="stylesheet" href="{% static 'musicapp/styles.css' %}">
-
-
        <style>
-           body {
-               margin: 0;
-               padding: 0;
-               font-family: 'Inter', sans-serif;
-               background: linear-gradient(to bottom, #1db954, #121212);
-               color: white;
-               min-height: 100vh;
-               display: flex;
-               flex-direction: column;
-               background-size: 110%;
-           }
+            /* General Reset */
+            body {
+                margin: 0;
+                padding: 0;
+                font-family: 'Inter', sans-serif;
+                background: linear-gradient(135deg, #1db954, #121212);
+                color: white;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                background-size: 110%;
+            }
 
+            /* Navigation Bar */
+            .navbar {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 15px 40px;
+                background: rgba(0, 0, 0, 0.8);
+                box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+            }
 
-           .navbar {
-               display: flex;
-               justify-content: space-between;
-               align-items: center;
-               padding: 15px 40px;
-               background: rgba(0, 0, 0, 0.8);
-               box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
-           }
+            .navbar nav {
+                display: flex;
+                justify-content: flex-end;
+                gap: 30px;
+            }
 
+            .navbar a {
+                color: white;
+                text-decoration: none;
+                font-size: 1rem;
+                font-weight: 500;
+                transition: color 0.3s ease;
+            }
 
-           .navbar nav{
-               display: flex;
-               justify-content: flex-end;
-               gap: 30px;
-           }
+            .navbar a:hover {
+                color: #1db954;
+            }
 
+            .navbar .logout {
+                display: flex;
+                justify-content: end;
+            }
 
-           .navbar a {
-               color:white;
-               text-decoration: none;
-               font-size: 1rem;
-               font-weight: 500;
-               transition: color 0.3s ease;
-           }
+            /* Main Container */
+            .container {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                align-items: center;
+                text-align: center;
+                align-items: center;
+                text-align: center;
+                padding: 20px;
+            }
 
+            /* Search Form */
+            .search-form {
+                background: rgba(0, 0, 0, 0.8);
+                padding: 25px 30px;
+                border-radius: 12px;
+                box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+                max-width: 500px;
+                width: 100%;
+                text-align: center;
+            }
 
-           .navbar a:hover {
-               color: #1db954;
-           }
+            .search-form input {
+                width: 100%;
+                max-width: 400px;
+                padding: 12px 15px;
+                margin-bottom: 15px;
+                border: 1px solid #ccc;
+                border-radius: 8px;
+                background: rgba(255, 255, 255, 0.9);
+                color: #121212;
+                font-size: 1rem;
+                transition: border 0.3s ease;
+                box-sizing: border-box;
+            }
 
+            .search-form input:focus {
+                outline: none;
+                border-color: #1db954;
+            }
 
-           .navbar .logout {
-               display: flex;
-               justify-content: end;
-           }
+            .search-form button {
+                width: 100%;
+                padding: 12px 20px;
+                font-size: 1.2rem;
+                color: white;
+                background: #1db954;
+                border: none;
+                border-radius: 25px;
+                cursor: pointer;
+                transition: background 0.3s ease;
+            }
 
+            .search-form button:hover {
+                background: #1aa34a;
+            }
 
-           .navbar .logo {
-               font-size: 1.5rem;
-               font-weight: 700;
-           }
+            /* Playlist List */
+            .playlist-list {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 20px;
+                justify-content: center;
+                margin-top: 30px;
+            }
 
+            /* Playlist Card */
+            .playlist-card {
+                display: flex;
+                align-items: center;
+                background: rgba(0, 0, 0, 0.8);
+                padding: 15px;
+                border-radius: 12px;
+                box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+                gap: 15px;
+                width: 100%;
+                max-width: 600px;
+                min-width: 600px;
+                height: auto;
+                cursor: pointer;
+                transition: transform 0.3s ease, background-color 0.3s ease;
+                position: relative;
+            }
 
-           .center-content {
-               flex: 1;
-               display: flex;
-               flex-direction: column;
-               justify-content: center;
-               align-items: center;
-               text-align: center;
-               padding: 20px;
-           }
+            .playlist-card input[type="checkbox"] {
+                position: absolute;
+                opacity: 0;
+                cursor: pointer;
+            }
 
+            .playlist-card input[type="checkbox"]:checked + label .playlist-content {
+                background-color: #1db954; /* Highlight color */
+                color: white; /* Adjust text color */
+                border-radius: 12px;
+                padding: 15px;
+            }
 
-           .add_songs h1 {
-               font-size: 3rem;
-               font-weight: bold;
-               color: #fff;
-               text-shadow: 0 4px 10px rgba(0, 0, 0, 0.6),
-                            0 0 15px #1db954,
-                            0 0 20px #1db954;
-               margin-bottom: 20px;
-           }
+            .playlist-card label {
+                width: 100%;
+                cursor: pointer;
+            }
 
+            /* Playlist Content */
+            .playlist-content {
+                display: flex;
+                width: 100%;
+                align-items: center;
+                transition: background-color 0.3s ease, color 0.3s ease;
+            }
 
-           .add_songs form {
-               display: flex;
-               flex-direction: column;
-               gap: 15px;
-               margin-bottom: 30px;
-           }
+            /* Artwork */
+            .add-art img {
+                width: 80px;
+                height: 80px;
+                border-radius: 10px;
+                object-fit: cover;
+                transition: transform 0.3s ease;
+            }
 
+            .playlist-info {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                padding-left: 15px;
+            }
 
-           .add_songs input[type="text"] {
-               padding: 10px;
-               font-size: 1rem;
-               border-radius: 5px;
-               border: none;
-               background: #121212;
-               color: white;
-               width: 250px;
-               margin: 0 auto;
-           }
+            .playlist-info h3 {
+                font-size: 1.2rem;
+                margin: 0;
+                color: white;
+            }
 
+            .playlist-info p {
+                margin: 5px 0;
+                font-size: 0.9rem;
+                color: #ccc;
+            }
 
-           .add_songs button {
-               padding: 10px;
-               font-size: 1rem;
-               border-radius: 5px;
-               background: #1db953;
-               color: white;
-               border: none;
-               cursor: pointer;
-               transition: background 0.3s ease;
-           }
+            /* Submit Button */
+            .submit-btn {
+                display: inline-block;
+                margin-top: 20px;
+                padding: 10px 20px;
+                font-size: 1.2rem;
+                background-color: #03250f;
+                border: none;
+                border-radius: 25px;
+                color: white;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }
 
+            .submit-btn:hover {
+                background-color: #084d20;
+            }
 
-           .add_songs button:hover {
-               background: #1aa94d;
-           }
-
-
-           .add_songs ul {
-               list-style: none;
-               padding: 0;
-               margin: 0;
-               text-align: left;
-               max-width: 600px;
-               margin: 0 auto;
-           }
-
-
-           .add_songs li{
-               padding: 10px;
-               background: rgba(0, 0, 0, 0.7);
-               margin-bottom: 10px;
-               border-radius: 5px;
-               display: flex;
-               justify-content: space-between;
-               align-items: center;
-           }
-
-
-           .add_songs input[type="checkbox"] {
-               margin-right: 15px;
-           }
-
-
-           .playlist_detail h1 {
-               font-size: 2.5 rem;
-               font-weight: bold;
-               margin-bottom: 20px;
-               text-align: center;
-               color: #fff;
-               text-shadow: 0 4px 10px rgba(0, 0, 0, 0.6),
-                            0 0 15px #1db954,
-                            0 0 20px #1db954;
-           }
-
-
-           .playlist_detail p {
-               font-size: 1.2rem;
-               color: #fff;
-               text-align: center;
-               margin-bottom: 30px;
-           }
-
-
-           .playlist_detail ul {
-               list-style: none;
-               padding: 0;
-               margin: 0;
-               text-align: left;
-               max-width: 600px;
-               margin: 0 auto;
-           }
-
-
-           .playlist_detail li {
-               padding: 10px;
-               background: rgba(0, 0, 0, 0.7);
-               margin-bottom: 10px;
-               border-radius: 5px;
-               display: flex;
-               justify-content: space-between;
-               align-items: center;
-           }
-
-
-           .playlist_detail form button {
-               padding: 5px 10px;
-               font-size: 1rem;
-               background: #fe264c;
-               color: white;
-               border: none;
-               border-radius: 5px;
-               cursor: pointer;
-           }
-
-
-           .playlist_detail form button:hover {
-               background: #e41d42;
-           }
+            .submit-btn-content {
+                text-align: center;
+                align-items: center;
+            }
        </style>
    </head>
    <body>
        <div class="navbar">
            <nav>
                <a href="{% url 'home' %}">Home</a>
-               <a href="{% url 'select_playlist'%}">Back to Playlists</a>
-           </nav>
-           <a class="logout" href="{%url 'logout' %}">Logout</a>
-       </div>
+            <a href="{% url 'playlist_detail' playlist_id %}">Back to Playlist</a>
+        </nav>
+        <a class="logout" href="{% url 'logout' %}">Logout</a>
+    </div>
 
+    <div class="container">
+        <form class="search-form" method="post">
+            {% csrf_token %}
+            <input type="text" name="song_name" placeholder="Search Song" required>
+            <button type="submit">Search</button>
+        </form>
 
-       <div class="center-content">
-           <div class="add_songs">
-               <h1>Add Songs</h1>
-               <form method="post">
-                   {% csrf_token %}
-                   <input type="text" name="song_name" placeholder="Enter song name" required>
-                   <button type="submit">Search</button>
-               </form>
-  
-               {% if search_results %}
-                   <h2>Search Results:</h2>
-                   <form method="post" action="{% url 'add_song_to_playlist' playlist_id %}">
-                       {% csrf_token %}
-                       <ul>
-                           {% for song in search_results %}
-                               <li>
-                                   <input type="checkbox" name="song_ids" value="{{ song.id }}">
-                                   {{ song.name }} by
-                                   {% for artist in song.artists %}
-                                       {{ artist.name }}{% if not forloop.last %}, {% endif %}
-                                   {% endfor %}
-                               </li>
-                           {% endfor %}
-                       </ul>
-                       <button type="submit">Add Selected Songs to Playlist</button>
-                   </form>
-               {% endif %}
-           </div>
-  
-           <div class="playlist_detail">
-               <h1>Playlist: {{ playlist.name }}</h1>
-               <p><strong>Description:</strong> {{ playlist.description }}</p>
-  
-               <h2>Playlist Contents:</h2>
-               <ul>
-                   {% if playlist.songs %}
-                       {% for song in playlist.songs %}
-                           <li>
-                               <strong>{{ song.title }}</strong> by {{ song.artist_name }}
-                               <span>(Duration: {{ song.duration }} seconds)</span>
-  
-                               <form method="post" action="{% url 'delete_song_from_playlist' playlist_id song.id %}">
-                                   {% csrf_token %}
-                                   <button type="submit">Remove Song</button>
-                               </form>
-                           </li>
-                       {% endfor %}
-                   {% else %}
-                       <li>No songs found in this playlist.</li>
-                   {% endif %}
-               </ul>
-           </div>
-       </div>
-   </body>
-   </html>
+        {% if message %}
+            {{ message }}
+        {% endif %}
 
+        {% if search_results %}
+            <h2>Search Results:</h2>
+            <form class="search-results-form" method="post" action="{% url 'add_song_to_playlist' playlist_id %}">
+                {% csrf_token %}
 
+                <button type="submit" class="submit-btn">Add Selected Songs to Playlist</button>
 
+                <div class="playlist-list">
+                    {% for song in track_info %}
+                        <div class="playlist-card">
+                            <!-- Checkbox Input -->
+                            <input type="checkbox" id="song-{{ song.id }}" name="song_ids" value="{{ song.id }}">
+                            <label for="song-{{ song.id }}">
+                                <!-- Label wraps the card content -->
+                                <div class="playlist-content">
+                                    <div class="add-art">
+                                        <img src="{{ song.image_url }}" alt="{{ song.name }}">
+                                    </div>
+                                    <div class="playlist-info">
+                                        <h3>{{ song.name }}</h3>
+                                        <p>Duration: {{ song.duration_ms }} seconds</p>
+                                        <p>Artist: {{ song.artist }}</p>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    {% endfor %}
+                </div>
+            </form>            
+        {% endif %}
+    </div>
+
+    <!-- <script>
+        document.querySelectorAll('.add-art input[type="checkbox"]').forEach((checkbox) => {
+            checkbox.addEventListener('change', function () {
+                const card = this.closest('.playlist-card');
+                if (this.checked) {
+                    card.style.backgroundColor = '#1db954';
+                } else {
+                    card.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+                }
+            });
+        });
+    </script> -->
+</body>
+</html>

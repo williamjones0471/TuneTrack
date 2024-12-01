@@ -276,22 +276,53 @@ def create_playlist(request):
     print("Token scopes:", token_info['scope'])
 
     if request.method == 'POST':
-        print("Token scopes:", token_info['scope'])
         playlist_name = request.POST.get('playlist_name')
         playlist_description = request.POST.get('playlist_description')
 
         user_id = sp.current_user()['id']
 
         # Create a new playlist with the provided name and description
-        playlist = sp.user_playlist_create(
-            user=user_id,
-            name=playlist_name,
-            public=True,  # Set to False if you want the playlist to be private
-            description=playlist_description
-        )
+        try:
+            playlist = sp.user_playlist_create(
+                user=user_id,
+                name=playlist_name,
+                public=True,  # Set to False if you want the playlist to be private
+                description=playlist_description
+            )
+        except:
+            return render(request, 'musicapp/create_playlist.html', {
+                "message": "Playlist Creation Failed."
+            })
 
-        # After creating the playlist display a success message
-        return render(request, 'musicapp/playlist_success.html', {'playlist': playlist})
+        playlist_id = playlist['id']
+
+        try:
+            # Fetch playlist details from Spotify
+            playlist = sp.playlist(playlist_id)
+            songs = playlist['tracks']['items']
+
+            # Prepare data for the template
+            playlist_data = {
+                'name': playlist['name'],
+                'description': playlist.get('description', 'No description available.'),
+                'songs': [
+                    {
+                        'id': song['track']['id'],  # Ensure we are including the song ID
+                        'title': song['track']['name'],
+                        'artist_name': ', '.join([artist['name'] for artist in song['track']['artists']]),
+                        'duration': song['track']['duration_ms'] // 1000,
+                        'image_url': song['track']['album']['images'][0]['url']
+                    } for song in songs if song['track']
+                ],
+            }
+        except Exception as e:
+            print(f"Error fetching playlist details: {e}")
+            return render(request, 'musicapp/error.html', {'message': 'Failed to fetch playlist details.'})
+
+        return render(request, 'musicapp/playlist_detail.html', {
+            'playlist': playlist_data,
+            'playlist_id': playlist_id  # Pass the playlist ID to the template
+        })
 
     return render(request, 'musicapp/create_playlist.html')
 
@@ -318,11 +349,12 @@ def add_song_to_playlist(request, playlist_id):
 
     return redirect('search_songs', playlist_id)
 
+from django.shortcuts import render, redirect
+
 def search_songs(request, playlist_id):
     token_info = request.session.get('token_info')
     
     if not token_info:
-        #Redirect to the login page 
         return redirect('spotify_login')
 
     access_token = token_info.get('access_token')
@@ -330,39 +362,67 @@ def search_songs(request, playlist_id):
     search_results = []
 
     try:
-        # Fetch playlist details from Spotify
         playlist = sp.playlist(playlist_id)
         songs = playlist['tracks']['items']
 
-        # Prepare data for the template
         playlist_data = {
             'name': playlist['name'],
             'description': playlist.get('description', 'No description available.'),
             'songs': [
                 {
-                    'id': song['track']['id'],  # Ensure we are including the song ID
+                    'id': song['track']['id'],
                     'title': song['track']['name'],
                     'artist_name': ', '.join([artist['name'] for artist in song['track']['artists']]),
                     'duration': song['track']['duration_ms'] // 1000
                 } for song in songs if song['track']
             ],
         }
+
     except Exception as e:
         print(f"Error fetching playlist details: {e}")
         return render(request, 'musicapp/error.html', {'message': 'Failed to fetch playlist details.'})
 
     if request.method == 'POST':
+        song_id = request.POST.get('song_id')
         song_name = request.POST.get('song_name')
-        if song_name:
-            # Perform the search
-            results = sp.search(q=song_name, type='track', limit=10)
-            search_results = results.get('tracks', {}).get('items', [])  # Access the list of tracks
+        image_url = request.POST.get('image_url')
+        song_duration = request.POST.get('song_duration')
 
+        if song_id and song_name and image_url and song_duration:
+            return redirect('playlist_detail', playlist_id=playlist_id, song_name=song_name, image_url=image_url, song_duration=song_duration)
+
+        track_info = []
+
+        if song_name:
+            try:
+                results = sp.search(q=song_name, type='track', limit=20)
+                search_results = results.get('tracks', {}).get('items', [])
+
+                for track in search_results:
+                    track_data = {
+                        'id': track['id'],
+                        'name': track['name'],
+                        'image_url': track['album']['images'][0]['url'] if track['album']['images'] else None,
+                        'artist': ", ".join([artist['name'] for artist in track['artists']]),
+                        'album': track['album']['name'],
+                        'duration_ms': track['duration_ms'] // 1000,
+                    }
+                    track_info.append(track_data)
+
+                return render(request, 'musicapp/search_songs.html', {
+                    'search_results': search_results, 
+                    'playlist_id': playlist_id,  
+                    'playlist': playlist_data,
+                    'track_info': track_info
+                })
+            except Exception as e:
+                print(f"Error processing search results: {e}")
+        
     return render(request, 'musicapp/search_songs.html', {
-        'search_results': search_results, 
-        'playlist_id': playlist_id,  
-        'playlist': playlist_data,
-    })
+            'playlist_id': playlist_id,  
+            'playlist': playlist_data,
+        })
+
 
 def select_playlist(request):
     token_info = request.session.get('token_info')
@@ -408,9 +468,6 @@ def playlist_detail(request, playlist_id):
         playlist = sp.playlist(playlist_id)
         songs = playlist['tracks']['items']
 
-        for song in songs:
-            print()
-
         # Prepare data for the template
         playlist_data = {
             'name': playlist['name'],
@@ -423,7 +480,7 @@ def playlist_detail(request, playlist_id):
                     'duration': song['track']['duration_ms'] // 1000,
                     'image_url': song['track']['album']['images'][0]['url']
                 } for song in songs if song['track']
-            ],
+            ][::-1] ,
         }
     except Exception as e:
         print(f"Error fetching playlist details: {e}")
@@ -457,39 +514,36 @@ def delete_song_from_playlist(request, playlist_id, song_id):
 
 @login_required
 def analytics(request):
-    # Get the access token from session
+        # Get the access token from session
     token_info = request.session.get('token_info')
 
     if not token_info:
-        # Redirect to the login page
         return redirect('spotify_login')
 
     sp_oauth = SpotifyOAuth(
         client_id=settings.SPOTIFY_CLIENT_ID,
         client_secret=settings.SPOTIFY_CLIENT_SECRET,
         redirect_uri=settings.SPOTIFY_REDIRECT_URI,
-        scope=settings.SPOTIFY_SCOPE,
-        cache_path=None
+        scope="user-library-read user-top-read"
     )
 
-    # Check if token is expired
+    # Check and refresh token if necessary
     if sp_oauth.is_token_expired(token_info):
         try:
-            # Refresh the token
             token_info = sp_oauth.refresh_access_token(token_info['refresh_token'])
-            # Update the session with the new token_info
             request.session['token_info'] = token_info
         except Exception as e:
-            print(f"Error refreshing access token: {e}")
-            return redirect('login')
+            print(f"Error refreshing token: {e}")
+            return redirect('spotify_login')
 
-    access_token = token_info.get('access_token')
-    sp = spotipy.Spotify(auth=access_token)
+    # Pass token to Spotipy
+    sp = spotipy.Spotify(auth_manager=sp_oauth)
+
 
     # Fetch user's top artists and tracks
     try:
-        top_artists_data = sp.current_user_top_artists(limit=50, time_range='long_term')
-        top_tracks_data = sp.current_user_top_tracks(limit=50, time_range='long_term')
+        top_artists_data = sp.current_user_top_artists(limit=10, time_range='long_term')
+        top_tracks_data = sp.current_user_top_tracks(limit=10, time_range='long_term')
     except Exception as e:
         print(f"Error fetching user's top artists or tracks: {e}")
         return redirect('login')
@@ -505,7 +559,11 @@ def analytics(request):
 
     # Process mood/tempo analysis
     track_ids = [track['id'] for track in top_tracks_data['items']]
-    audio_features = sp.audio_features(track_ids)
+    
+    try:
+        audio_features = sp.audio_features(["11dFghVXANMlKmJXsNCbNl"])
+    except spotipy.SpotifyException as e:
+        print(f"Error: {e.http_status} - {e.msg}")
 
     tempo_list = [f['tempo'] for f in audio_features if f]
     energy_list = [f['energy'] for f in audio_features if f]
