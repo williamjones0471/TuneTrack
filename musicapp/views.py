@@ -133,6 +133,7 @@ def returning_user(request):
             return HttpResponseRedirect(reverse('home'))
         else:
             return render(request, 'musicapp/returning_user.html', {
+                'user': user_display_name,
                 "message": "Invalid username and/or password"
             })
 
@@ -222,7 +223,7 @@ def home(request):
             print(f"Error fetching user's top artists or tracks: {e}")
             return render(request, "musicapp/home.html", {
                 'user': user_display_name,
-                "message": "Unable to Get Recommendations.",
+                # "message": "Unable to Get Recommendations.",
             })
 
 
@@ -561,9 +562,9 @@ def analytics(request):
     track_ids = [track['id'] for track in top_tracks_data['items']]
     
     try:
-        audio_features = sp.audio_features(["11dFghVXANMlKmJXsNCbNl"])
+        audio_features = sp.audio_features(tracks=track_ids)
     except spotipy.SpotifyException as e:
-        print(f"Error: {e.http_status} - {e.msg}")
+        return HttpResponseRedirect(reverse('home'))
 
     tempo_list = [f['tempo'] for f in audio_features if f]
     energy_list = [f['energy'] for f in audio_features if f]
