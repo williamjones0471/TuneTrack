@@ -238,6 +238,72 @@
             .playlist-title {
                 text-align: center;
             }
+
+            /* Bulk Edit Section */
+            .bulk-edit-options {
+                margin: 20px 0;
+                text-align: center;
+            }
+
+            .bulk-edit-options h2 {
+                font-size: 1.5rem;
+                color: white;
+                margin-bottom: 20px;
+            }
+
+            /* Card-Like Style */
+            .bulk-edit-card {
+                background: rgba(0, 0, 0, 0.8);
+                padding: 15px;
+                border-radius: 12px;
+                box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+                margin: 10px auto;
+                max-width: 500px;
+                transition: transform 0.3s ease, background 0.3s ease;
+            }
+
+            .bulk-edit-card:hover {
+                transform: translateY(-5px);
+                background: rgba(29, 185, 84, 0.9);
+            }
+
+            /* Content Style */
+            .bulk-edit-content {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+                font-size: 1.1rem;
+                color: white;
+                text-decoration: none;
+            }
+
+            /* Icon Style */
+            .bulk-edit-icon {
+                font-size: 1.5rem;
+            }
+
+            /* Remove the blue underline and visited link color */
+            a {
+                text-decoration: none; /* Removes the underline */
+                color: white; /* Set default color for links */
+            }
+
+            /* Add hover effects for better interaction */
+            a:hover {
+                color: #1db954; 
+            }
+
+            /* Add active link styles */
+            a:active {
+                color: #1db954; /* Same as hover or another color */
+            }
+
+            /* Add visited link styles */
+            a:visited {
+                color: white; /* Matches default to prevent purple color */
+            }
+
         </style>
     </head>
     <body>
@@ -258,19 +324,21 @@
                 <h1 class="playlist-title">Playlist: {{ playlist.name }}</h1>
                 <div class="bulk-edit-options">
                     <h2>Bulk Edit Options</h2>
-                    <ul>
-                        <li>
-                            <a href="{% url 'bulk_remove_by_artist' playlist_id=playlist.id %}">
-                                Remove All Songs by Artist
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{% url 'bulk_remove_by_album' playlist_id=playlist.id %}">
-                                Remove All Songs from Album
-                            </a>
-                        </li>
-                    </ul>
-                </div>
+                    <div class="bulk-edit-card">
+                        <a href="{% url 'bulk_remove_by_artist' playlist_id=playlist.id %}">
+                            <div class="bulk-edit-content">
+                                <span class="bulk-edit-icon">🎤</span> Remove All Songs by Artist
+                            </div>
+                        </a>
+                    </div>
+                    <div class="bulk-edit-card">
+                        <a href="{% url 'bulk_remove_by_album' playlist_id=playlist.id %}">
+                            <div class="bulk-edit-content">
+                                <span class="bulk-edit-icon">💿</span> Remove All Songs from Album
+                            </div>
+                        </a>
+                    </div>
+                </div>                
                 <div class="playlist-card">
                     <div class="add-art">
                         <img src="{% static 'plus_sign.jpg' %}">
