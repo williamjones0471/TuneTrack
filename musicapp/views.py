@@ -11,12 +11,14 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.cache import cache
 import json
 import os
+from django.shortcuts import get_object_or_404
+
 
 import spotipy
 import spotipy.util as util
 from spotipy.oauth2 import SpotifyOAuth
 
-from .models import User
+from .models import User, QuizSession, Question, Playlist
 
 def login_view(request):
     cache.delete('login')
@@ -456,9 +458,9 @@ def select_playlist(request):
 
 def playlist_detail(request, playlist_id):
     token_info = request.session.get('token_info')
-    
+
     if not token_info:
-        #Redirect to the login page 
+        # Redirect to the login page
         return redirect('spotify_login')
 
     access_token = token_info.get('access_token')
@@ -471,17 +473,17 @@ def playlist_detail(request, playlist_id):
 
         # Prepare data for the template
         playlist_data = {
+            'id': playlist_id,  # Include the playlist ID here
             'name': playlist['name'],
             'description': playlist.get('description', 'No description available.'),
             'songs': [
                 {
-                    'id': song['track']['id'],  # Ensure we are including the song ID
+                    'id': song['track']['id'],
                     'title': song['track']['name'],
                     'artist_name': ', '.join([artist['name'] for artist in song['track']['artists']]),
-                    'duration': song['track']['duration_ms'] // 1000,
-                    'image_url': song['track']['album']['images'][0]['url']
+                    'duration': song['track']['duration_ms'] // 1000
                 } for song in songs if song['track']
-            ][::-1] ,
+            ],
         }
     except Exception as e:
         print(f"Error fetching playlist details: {e}")
@@ -489,8 +491,11 @@ def playlist_detail(request, playlist_id):
 
     return render(request, 'musicapp/playlist_detail.html', {
         'playlist': playlist_data,
-        'playlist_id': playlist_id  # Pass the playlist ID to the template
+        'playlist_id': playlist_id,  # Pass the playlist ID explicitly
     })
+
+
+
 
 def delete_song_from_playlist(request, playlist_id, song_id):
     token_info = request.session.get('token_info')
@@ -700,3 +705,266 @@ def playlist_analytics(request, playlist_id):
     }
 
     return render(request, 'musicapp/playlist_analytics.html', context)
+
+@login_required
+def start_quiz(request, playlist_id):
+    # Get access token from session
+    token_info = request.session.get('token_info')
+    if not token_info:
+        return redirect('spotify_login')
+
+    # Initialize Spotify client
+    access_token = token_info.get('access_token')
+    sp = spotipy.Spotify(auth=access_token)
+
+    try:
+        # Fetch playlist details and track information
+        playlist = sp.playlist(playlist_id)
+        tracks = playlist['tracks']['items']
+
+        if not tracks:
+            messages.error(request, "No tracks found in this playlist to create a quiz.")
+            return redirect('playlist_detail', playlist_id=playlist_id)
+
+        # Process track data for the quiz
+        quiz_data = []
+        for item in tracks:
+            track = item['track']
+            quiz_data.append({
+                'question': f"Guess the artist of the track: {track['name']}",
+                'answer': track['artists'][0]['name'],
+                'options': [track['artists'][0]['name'], "Artist 2", "Artist 3", "Artist 4"],  # Example options
+            })
+
+        # Store the quiz data in the session for use during the quiz
+        request.session['quiz_data'] = quiz_data
+
+        return redirect('quiz_question', playlist_id=playlist_id, question_index=0)
+
+    except Exception as e:
+        print(f"Error starting quiz: {e}")
+        messages.error(request, "Failed to start the quiz.")
+        return redirect('playlist_detail', playlist_id=playlist_id)
+
+@login_required
+def quiz_question(request, quiz_session_id, question_number):
+    quiz_session = QuizSession.objects.get(id=quiz_session_id, user=request.user)
+    
+    if question_number > quiz_session.total_questions:
+        return redirect('quiz_summary', quiz_session_id=quiz_session.id)
+    
+    if request.method == 'POST':
+        # Process the user's answer
+        selected_option = request.POST.get('option')
+        question_id = request.POST.get('question_id')
+        question = Question.objects.get(id=question_id)
+        question.user_answer = selected_option
+        question.is_correct = (selected_option == question.correct_answer)
+        if question.is_correct:
+            quiz_session.score += 1
+        question.save()
+        quiz_session.save()
+        # Redirect to the next question
+        return redirect('quiz_question', quiz_session_id=quiz_session.id, question_number=question_number + 1)
+    else:
+        # Generate or retrieve the question
+        question = generate_question(quiz_session)
+        context = {
+            'quiz_session': quiz_session,
+            'question': question,
+            'question_number': question_number,
+        }
+        return render(request, 'musicapp/quiz_question.html', context)
+
+@login_required
+def quiz_summary(request, quiz_session_id):
+    quiz_session = QuizSession.objects.get(id=quiz_session_id, user=request.user)
+    questions = Question.objects.filter(quiz_session=quiz_session)
+    context = {
+        'quiz_session': quiz_session,
+        'questions': questions,
+    }
+    return render(request, 'musicapp/quiz_summary.html', context)
+
+def generate_question(quiz_session):
+    # Check if a question already exists for this question number
+    existing_questions = Question.objects.filter(quiz_session=quiz_session)
+    if existing_questions.count() >= quiz_session.total_questions:
+        return None  # All questions have been generated
+    
+    # Get songs from the playlist
+    songs = Song.objects.filter(playlist=quiz_session.playlist)
+    
+    # Randomly select a song
+    song = random.choice(songs)
+    
+    # Randomly choose a question type
+    question_type = random.choice(['release_year', 'album_name', 'genre'])
+    
+    if question_type == 'release_year':
+        question_text = f"In which year was '{song.title}' by {song.artist_name} released?"
+        correct_answer = str(song.release_year)
+        # Generate wrong options
+        options = generate_year_options(correct_answer)
+    elif question_type == 'album_name':
+        question_text = f"Which album features the song '{song.title}' by {song.artist_name}?"
+        correct_answer = song.album_name
+        # Generate wrong options
+        options = generate_album_options(correct_answer, song.artist_name)
+    elif question_type == 'genre':
+        question_text = f"What is the primary genre of '{song.title}' by {song.artist_name}?"
+        correct_answer = song.genre
+        # Generate wrong options
+        options = generate_genre_options(correct_answer)
+    else:
+        # Fallback question
+        question_text = f"Who is the artist of the song '{song.title}'?"
+        correct_answer = song.artist_name
+        options = generate_artist_options(correct_answer)
+    
+    # Save the question
+    question = Question.objects.create(
+        quiz_session=quiz_session,
+        song=song,
+        question_text=question_text,
+        correct_answer=correct_answer
+    )
+    # Attach options to the question (in context for the template)
+    question.options = options
+    return question
+
+def generate_year_options(correct_answer):
+    correct_year = int(correct_answer)
+    options = [correct_answer]
+    while len(options) < 4:
+        year = str(random.randint(correct_year - 5, correct_year + 5))
+        if year not in options:
+            options.append(year)
+    random.shuffle(options)
+    return options
+
+def generate_album_options(correct_answer, artist_name):
+    albums = Song.objects.filter(artist_name=artist_name).values_list('album_name', flat=True).distinct()
+    albums = [album for album in albums if album != correct_answer]
+    options = random.sample(albums, min(3, len(albums)))
+    options.append(correct_answer)
+    random.shuffle(options)
+    return options
+
+def generate_genre_options(correct_answer):
+    genres = ['Pop', 'Rock', 'Hip-Hop', 'Jazz', 'Classical', 'Electronic']
+    genres = [genre for genre in genres if genre != correct_answer]
+    options = random.sample(genres, 3)
+    options.append(correct_answer)
+    random.shuffle(options)
+    return options
+
+@login_required
+def bulk_remove_by_artist(request, playlist_id):
+    token_info = request.session.get('token_info')
+
+    if not token_info:
+        # Redirect to the login page
+        return redirect('spotify_login')
+
+    access_token = token_info.get('access_token')
+    sp = spotipy.Spotify(auth=access_token)
+
+    try:
+        # Fetch playlist details from Spotify
+        playlist = sp.playlist(playlist_id)
+        tracks = playlist['tracks']['items']
+
+        if request.method == 'POST':
+            artist_name = request.POST.get('artist_name')
+            if artist_name:
+                # Get songs by the artist in the playlist
+                songs_to_remove = [
+                    track for track in tracks
+                    if any(artist['name'] == artist_name for artist in track['track']['artists'])
+                ]
+                track_uris = [track['track']['uri'] for track in songs_to_remove]
+
+                # Remove tracks from Spotify playlist
+                try:
+                    sp.playlist_remove_all_occurrences_of_items(playlist_id, track_uris)
+                except spotipy.exceptions.SpotifyException as e:
+                    messages.error(request, f"An error occurred while removing songs: {e}")
+                    return redirect('bulk_remove_by_artist', playlist_id=playlist_id)
+
+                messages.success(request, f"Successfully removed all songs by '{artist_name}' from the playlist.")
+                return redirect('playlist_detail', playlist_id=playlist_id)
+        else:
+            # Get list of artists in the playlist
+            artists = set(
+                artist['name']
+                for track in tracks if track['track']
+                for artist in track['track']['artists']
+            )
+            context = {
+                'playlist': {
+                    'id': playlist_id,
+                    'name': playlist['name'],
+                },
+                'artists': sorted(artists),
+            }
+            return render(request, 'musicapp/bulk_remove_by_artist.html', context)
+    except Exception as e:
+        print(f"Error fetching playlist details: {e}")
+        messages.error(request, 'Failed to fetch playlist details.')
+        return redirect('select_playlist')
+
+
+@login_required
+def bulk_remove_by_album(request, playlist_id):
+    token_info = request.session.get('token_info')
+
+    if not token_info:
+        # Redirect to the login page
+        return redirect('spotify_login')
+
+    access_token = token_info.get('access_token')
+    sp = spotipy.Spotify(auth=access_token)
+
+    try:
+        # Fetch playlist details from Spotify
+        playlist = sp.playlist(playlist_id)
+        tracks = playlist['tracks']['items']
+
+        if request.method == 'POST':
+            album_name = request.POST.get('album_name')
+            if album_name:
+                # Get songs from the album in the playlist
+                songs_to_remove = [
+                    track for track in tracks
+                    if track['track']['album']['name'] == album_name
+                ]
+                track_uris = [track['track']['uri'] for track in songs_to_remove]
+
+                # Remove tracks from Spotify playlist
+                try:
+                    sp.playlist_remove_all_occurrences_of_items(playlist_id, track_uris)
+                except spotipy.exceptions.SpotifyException as e:
+                    messages.error(request, f"An error occurred while removing songs: {e}")
+                    return redirect('bulk_remove_by_album', playlist_id=playlist_id)
+
+                messages.success(request, f"Successfully removed all songs from album '{album_name}' from the playlist.")
+                return redirect('playlist_detail', playlist_id=playlist_id)
+        else:
+            # Get list of albums in the playlist
+            albums = set(
+                track['track']['album']['name']
+                for track in tracks if track['track']
+            )
+            context = {
+                'playlist': {
+                    'id': playlist_id,
+                    'name': playlist['name'],
+                },
+                'albums': sorted(albums),
+            }
+            return render(request, 'musicapp/bulk_remove_by_album.html', context)
+    except Exception as e:
+        print(f"Error fetching playlist details: {e}")
+        messages.error(request, 'Failed to fetch playlist details.')
+        return redirect('select_playlist')

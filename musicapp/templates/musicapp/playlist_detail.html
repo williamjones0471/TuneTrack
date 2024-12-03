@@ -255,7 +255,21 @@
             <div class="playlist_detail">
 
                 <h1 class="playlist-title">Playlist: {{ playlist.name }}</h1>
-
+                <div class="bulk-edit-options">
+                    <h2>Bulk Edit Options</h2>
+                    <ul>
+                        <li>
+                            <a href="{% url 'bulk_remove_by_artist' playlist_id=playlist.id %}">
+                                Remove All Songs by Artist
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'bulk_remove_by_album' playlist_id=playlist.id %}">
+                                Remove All Songs from Album
+                            </a>
+                        </li>
+                    </ul>
+                </div>
                 <div class="playlist-card">
                     <div class="add-art">
                         <img src="{% static 'plus_sign.jpg' %}">

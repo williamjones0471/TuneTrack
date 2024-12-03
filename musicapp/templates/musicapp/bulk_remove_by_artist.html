@@ -1,0 +1,17 @@
+{% extends 'base_generic.html' %}
+{% load static %}
+
+{% block content %}
+<h1>Bulk Remove by Artist from "{{ playlist.name }}"</h1>
+<form method="post">
+    {% csrf_token %}
+    <label for="artist_name">Select Artist:</label>
+    <select name="artist_name" id="artist_name" required>
+        {% for artist in artists %}
+            <option value="{{ artist }}">{{ artist }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Remove All Songs by Artist</button>
+</form>
+<a href="{% url 'playlist_detail' playlist_id=playlist.id %}">Back to Playlist</a>
+{% endblock %}

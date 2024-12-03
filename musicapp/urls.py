@@ -18,4 +18,9 @@ urlpatterns = [
     path('login/returning-user', views.returning_user, name='returning_user'),
     path('analytics/', views.analytics, name='analytics'),
     path('playlist/<str:playlist_id>/analytics/', views.playlist_analytics, name='playlist_analytics'),
+    path('quiz/<int:quiz_session_id>/summary/', views.quiz_summary, name='quiz_summary'),
+    path('playlist/<str:playlist_id>/quiz/start/', views.start_quiz, name='start_quiz'),
+    path('playlist/<str:playlist_id>/quiz/<int:question_index>/', views.quiz_question, name='quiz_question'),
+    path('playlist/<str:playlist_id>/bulk-remove/artist/', views.bulk_remove_by_artist, name='bulk_remove_by_artist'),
+    path('playlist/<str:playlist_id>/bulk-remove/album/', views.bulk_remove_by_album, name='bulk_remove_by_album'),
 ]

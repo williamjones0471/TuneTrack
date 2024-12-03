@@ -1,0 +1,17 @@
+{% extends 'base_generic.html' %}
+{% load static %}
+
+{% block content %}
+<h1>Bulk Remove by Album from "{{ playlist.name }}"</h1>
+<form method="post">
+    {% csrf_token %}
+    <label for="album_name">Select Album:</label>
+    <select name="album_name" id="album_name" required>
+        {% for album in albums %}
+            <option value="{{ album }}">{{ album }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Remove All Songs from Album</button>
+</form>
+<a href="{% url 'playlist_detail' playlist_id=playlist.id %}">Back to Playlist</a>
+{% endblock %}
