@@ -222,66 +222,64 @@
    <body>
        <div class="navbar">
            <nav>
-               <a href="{% url 'home' %}">Home</a>
-            <a href="{% url 'playlist_detail' playlist_id %}">Back to Playlist</a>
-        </nav>
+                <a href="{% url 'home' %}">Home</a>
+                <a href="{% url 'playlist_detail' playlist_id %}">Back to Playlist</a>
+            </nav>
         <a class="logout" href="{% url 'logout' %}">Logout</a>
-    </div>
+        </div>
 
-    <div class="container">
-        <form class="search-form" method="post">
-            {% csrf_token %}
-            <input type="text" name="song_name" placeholder="Search Song" required>
-            <button type="submit">Search</button>
-        </form>
-
-        {% if message %}
-            {{ message }}
-        {% endif %}
-
-        {% if search_results %}
-            <h2>Search Results:</h2>
-            <form class="search-results-form" method="post" action="{% url 'add_song_to_playlist' playlist_id %}">
+        <div class="container">
+            <form class="search-form" method="post">
                 {% csrf_token %}
+                <input type="text" name="song_name" placeholder="Search Song" required>
+                <button type="submit">Search</button>
+            </form>
 
-                <button type="submit" class="submit-btn">Add Selected Songs to Playlist</button>
+            {% if message %}
+                {{ message }}
+            {% endif %}
 
-                <div class="playlist-list">
-                    {% for song in track_info %}
-                        <div class="playlist-card">
-                            <!-- Checkbox Input -->
-                            <input type="checkbox" id="song-{{ song.id }}" name="song_ids" value="{{ song.id }}">
-                            <label for="song-{{ song.id }}">
-                                <!-- Label wraps the card content -->
-                                <div class="playlist-content">
-                                    <div class="add-art">
-                                        <img src="{{ song.image_url }}" alt="{{ song.name }}">
+            {% if search_results %}
+                <h2>Search Results:</h2>
+                <form class="search-results-form" method="post" action="{% url 'add_song_to_playlist' playlist_id %}">
+                    {% csrf_token %}
+
+                    <button type="submit" class="submit-btn">Add Selected Songs to Playlist</button>
+
+                    <div class="playlist-list">
+                        {% for song in track_info %}
+                            <div class="playlist-card">
+                                <input type="checkbox" id="song-{{ song.id }}" name="song_ids" value="{{ song.id }}">
+                                <label for="song-{{ song.id }}">
+                                    <div class="playlist-content">
+                                        <div class="add-art">
+                                            <img src="{{ song.image_url }}" alt="{{ song.name }}">
+                                        </div>
+                                        <div class="playlist-info">
+                                            <h3>{{ song.name }}</h3>
+                                            <p>Duration: {{ song.duration_ms }} seconds</p>
+                                            <p>Artist: {{ song.artist }}</p>
+                                        </div>
                                     </div>
-                                    <div class="playlist-info">
-                                        <h3>{{ song.name }}</h3>
-                                        <p>Duration: {{ song.duration_ms }} seconds</p>
-                                        <p>Artist: {{ song.artist }}</p>
-                                    </div>
-                                </div>
-                            </label>
-                        </div>
-                    {% endfor %}
-                </div>
-            </form>            
-        {% endif %}
-    </div>
+                                </label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </form>            
+            {% endif %}
+        </div>
 
-    <!-- <script>
-        document.querySelectorAll('.add-art input[type="checkbox"]').forEach((checkbox) => {
-            checkbox.addEventListener('change', function () {
-                const card = this.closest('.playlist-card');
-                if (this.checked) {
-                    card.style.backgroundColor = '#1db954';
-                } else {
-                    card.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
-                }
+        <!-- <script>
+            document.querySelectorAll('.add-art input[type="checkbox"]').forEach((checkbox) => {
+                checkbox.addEventListener('change', function () {
+                    const card = this.closest('.playlist-card');
+                    if (this.checked) {
+                        card.style.backgroundColor = '#1db954';
+                    } else {
+                        card.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+                    }
+                });
             });
-        });
-    </script> -->
-</body>
+        </script> -->
+    </body>
 </html>

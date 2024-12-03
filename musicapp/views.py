@@ -445,7 +445,7 @@ def select_playlist(request):
             playlist_data = {
                 'id': playlist['id'],
                 'name': playlist['name'],
-                'image_url': playlist['images'][0]['url'] if playlist['images'] else None,  # Fetch cover image URL
+                'image_url': playlist['images'][0]['url'] if playlist['images'] else None,
             }
             playlist_info.append(playlist_data)
     except:
@@ -482,7 +482,11 @@ def playlist_detail(request, playlist_id):
                     'title': song['track']['name'],
                     'artist_name': ', '.join([artist['name'] for artist in song['track']['artists']]),
                     'duration': song['track']['duration_ms'] // 1000,
+<<<<<<< Updated upstream
                     'image_url': song['track']['album']['images'][0]['url'] if song['track']['album']['images'] else None  # Add image URL
+=======
+                    'image_url': song['track']['album']['images'][0]['url'] if playlist['images'] else None,  # Fetch cover image URL
+>>>>>>> Stashed changes
                 } for song in songs if song['track']
             ],
         }
@@ -653,7 +657,11 @@ def playlist_analytics(request, playlist_id):
 
     if not tracks:
         messages.info(request, 'No tracks found in the selected playlist.')
-        return render(request, 'musicapp/playlist_analytics.html')
+        return render(request, 'musicapp/playlist_analytics.html', {
+            'playlist_name': playlist['name'],
+            'playlist_id': playlist_id,
+            'message': 'No tracks found in the selected playlist.',
+        })
 
     # Process genres
     artist_ids = set()
@@ -708,7 +716,7 @@ def playlist_analytics(request, playlist_id):
 
     context = {
         'playlist_name': playlist['name'],
-        'playlist_id': playlist['id'],
+        'playlist_id': playlist_id,
         'top_genres': top_genres,
         # 'avg_tempo': avg_tempo,
         # 'avg_energy': avg_energy,
