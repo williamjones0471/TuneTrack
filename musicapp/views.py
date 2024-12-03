@@ -548,8 +548,8 @@ def analytics(request):
 
     # Fetch user's top artists and tracks
     try:
-        top_artists_data = sp.current_user_top_artists(limit=10, time_range='long_term')
-        top_tracks_data = sp.current_user_top_tracks(limit=10, time_range='long_term')
+        top_artists_data = sp.current_user_top_artists(limit=50, time_range='long_term')
+        top_tracks_data = sp.current_user_top_tracks(limit=50, time_range='long_term')
     except Exception as e:
         print(f"Error fetching user's top artists or tracks: {e}")
         return redirect('login')
@@ -565,19 +565,24 @@ def analytics(request):
 
     # Process mood/tempo analysis
     track_ids = [track['id'] for track in top_tracks_data['items']]
-    
-    try:
-        audio_features = sp.audio_features(tracks=track_ids)
-    except spotipy.SpotifyException as e:
-        return HttpResponseRedirect(reverse('home'))
 
-    tempo_list = [f['tempo'] for f in audio_features if f]
-    energy_list = [f['energy'] for f in audio_features if f]
-    valence_list = [f['valence'] for f in audio_features if f]
 
-    avg_tempo = sum(tempo_list) / len(tempo_list) if tempo_list else 0
-    avg_energy = sum(energy_list) / len(energy_list) if energy_list else 0
-    avg_valence = sum(valence_list) / len(valence_list) if valence_list else 0
+    #-------------------- FEATURE WAS DEPRECATED -----------------------------
+
+    # try:
+    #     audio_features = sp.audio_features(tracks=track_ids)
+    # except spotipy.SpotifyException as e:
+    #     return HttpResponseRedirect(reverse('home'))
+
+    # tempo_list = [f['tempo'] for f in audio_features if f]
+    # energy_list = [f['energy'] for f in audio_features if f]
+    # valence_list = [f['valence'] for f in audio_features if f]
+
+    # avg_tempo = sum(tempo_list) / len(tempo_list) if tempo_list else 0
+    # avg_energy = sum(energy_list) / len(energy_list) if energy_list else 0
+    # avg_valence = sum(valence_list) / len(valence_list) if valence_list else 0
+
+    #-------------------------------------------------------------------------
 
     # Artist breakdown
     artist_counts = {}
@@ -591,9 +596,9 @@ def analytics(request):
 
     context = {
         'top_genres': top_genres,
-        'avg_tempo': avg_tempo,
-        'avg_energy': avg_energy,
-        'avg_valence': avg_valence,
+        # 'avg_tempo': avg_tempo,
+        # 'avg_energy': avg_energy,
+        # 'avg_valence': avg_valence,
         'top_artists_breakdown': top_artists_breakdown,
     }
 
