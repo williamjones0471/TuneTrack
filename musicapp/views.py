@@ -676,18 +676,23 @@ def playlist_analytics(request, playlist_id):
 
     # Process mood/tempo analysis
     track_ids = [item['track']['id'] for item in tracks if item['track'] and item['track']['id']]
-    audio_features = []
-    for i in range(0, len(track_ids), 100):
-        batch_ids = track_ids[i:i+100]
-        audio_features.extend(sp.audio_features(batch_ids))
 
-    tempo_list = [f['tempo'] for f in audio_features if f]
-    energy_list = [f['energy'] for f in audio_features if f]
-    valence_list = [f['valence'] for f in audio_features if f]
+    #-------------------- FEATURE WAS DEPRECATED -----------------------------
 
-    avg_tempo = sum(tempo_list) / len(tempo_list) if tempo_list else 0
-    avg_energy = sum(energy_list) / len(energy_list) if energy_list else 0
-    avg_valence = sum(valence_list) / len(valence_list) if valence_list else 0
+    # audio_features = []
+    # for i in range(0, len(track_ids), 100):
+    #     batch_ids = track_ids[i:i+100]
+    #     audio_features.extend(sp.audio_features(batch_ids))
+
+    # tempo_list = [f['tempo'] for f in audio_features if f]
+    # energy_list = [f['energy'] for f in audio_features if f]
+    # valence_list = [f['valence'] for f in audio_features if f]
+
+    # avg_tempo = sum(tempo_list) / len(tempo_list) if tempo_list else 0
+    # avg_energy = sum(energy_list) / len(energy_list) if energy_list else 0
+    # avg_valence = sum(valence_list) / len(valence_list) if valence_list else 0
+
+    #--------------------------------------------------------------------------
 
     # Artist breakdown
     artist_counts = {}
@@ -702,10 +707,11 @@ def playlist_analytics(request, playlist_id):
 
     context = {
         'playlist_name': playlist['name'],
+        'playlist_id': playlist['id'],
         'top_genres': top_genres,
-        'avg_tempo': avg_tempo,
-        'avg_energy': avg_energy,
-        'avg_valence': avg_valence,
+        # 'avg_tempo': avg_tempo,
+        # 'avg_energy': avg_energy,
+        # 'avg_valence': avg_valence,
         'top_artists_breakdown': top_artists_breakdown,
     }
 
