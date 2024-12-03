@@ -473,7 +473,7 @@ def playlist_detail(request, playlist_id):
 
         # Prepare data for the template
         playlist_data = {
-            'id': playlist_id,  # Include the playlist ID here
+            'id': playlist_id,
             'name': playlist['name'],
             'description': playlist.get('description', 'No description available.'),
             'songs': [
@@ -481,7 +481,8 @@ def playlist_detail(request, playlist_id):
                     'id': song['track']['id'],
                     'title': song['track']['name'],
                     'artist_name': ', '.join([artist['name'] for artist in song['track']['artists']]),
-                    'duration': song['track']['duration_ms'] // 1000
+                    'duration': song['track']['duration_ms'] // 1000,
+                    'image_url': song['track']['album']['images'][0]['url'] if song['track']['album']['images'] else None  # Add image URL
                 } for song in songs if song['track']
             ],
         }
