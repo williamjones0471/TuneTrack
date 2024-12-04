@@ -894,21 +894,26 @@ def bulk_remove_by_artist(request, playlist_id):
         if request.method == 'POST':
             artist_name = request.POST.get('artist_name')
             if artist_name:
-                # Get songs by the artist in the playlist
-                songs_to_remove = [
-                    track for track in tracks
-                    if any(artist['name'] == artist_name for artist in track['track']['artists'])
-                ]
-                track_uris = [track['track']['uri'] for track in songs_to_remove]
+                if artist_name != "":
+                    # Get songs by the artist in the playlist
+                    songs_to_remove = [
+                        track for track in tracks
+                        if any(artist['name'] == artist_name for artist in track['track']['artists'])
+                    ]
+                    track_uris = [track['track']['uri'] for track in songs_to_remove]
 
-                # Remove tracks from Spotify playlist
-                try:
-                    sp.playlist_remove_all_occurrences_of_items(playlist_id, track_uris)
-                except spotipy.exceptions.SpotifyException as e:
-                    messages.error(request, f"An error occurred while removing songs: {e}")
-                    return redirect('bulk_remove_by_artist', playlist_id=playlist_id)
+                    # Remove tracks from Spotify playlist
+                    try:
+                        sp.playlist_remove_all_occurrences_of_items(playlist_id, track_uris)
+                    except spotipy.exceptions.SpotifyException as e:
+                        messages.error(request, f"An error occurred while removing songs: {e}")
+                        return redirect('bulk_remove_by_artist', playlist_id=playlist_id)
 
-                messages.success(request, f"Successfully removed all songs by '{artist_name}' from the playlist.")
+                    messages.success(request, f"Successfully removed all songs by '{artist_name}' from the playlist.")
+                    return redirect('playlist_detail', playlist_id=playlist_id)
+                else:
+                    return redirect('playlist_detail', playlist_id=playlist_id)
+            else:
                 return redirect('playlist_detail', playlist_id=playlist_id)
         else:
             # Get list of artists in the playlist
@@ -950,21 +955,26 @@ def bulk_remove_by_album(request, playlist_id):
         if request.method == 'POST':
             album_name = request.POST.get('album_name')
             if album_name:
-                # Get songs from the album in the playlist
-                songs_to_remove = [
-                    track for track in tracks
-                    if track['track']['album']['name'] == album_name
-                ]
-                track_uris = [track['track']['uri'] for track in songs_to_remove]
+                if album_name != "":
+                    # Get songs from the album in the playlist
+                    songs_to_remove = [
+                        track for track in tracks
+                        if track['track']['album']['name'] == album_name
+                    ]
+                    track_uris = [track['track']['uri'] for track in songs_to_remove]
 
-                # Remove tracks from Spotify playlist
-                try:
-                    sp.playlist_remove_all_occurrences_of_items(playlist_id, track_uris)
-                except spotipy.exceptions.SpotifyException as e:
-                    messages.error(request, f"An error occurred while removing songs: {e}")
-                    return redirect('bulk_remove_by_album', playlist_id=playlist_id)
+                    # Remove tracks from Spotify playlist
+                    try:
+                        sp.playlist_remove_all_occurrences_of_items(playlist_id, track_uris)
+                    except spotipy.exceptions.SpotifyException as e:
+                        messages.error(request, f"An error occurred while removing songs: {e}")
+                        return redirect('bulk_remove_by_album', playlist_id=playlist_id)
 
-                messages.success(request, f"Successfully removed all songs from album '{album_name}' from the playlist.")
+                    messages.success(request, f"Successfully removed all songs from album '{album_name}' from the playlist.")
+                    return redirect('playlist_detail', playlist_id=playlist_id)
+                else:
+                    return redirect('playlist_detail', playlist_id=playlist_id)
+            else:
                 return redirect('playlist_detail', playlist_id=playlist_id)
         else:
             # Get list of albums in the playlist
@@ -983,4 +993,4 @@ def bulk_remove_by_album(request, playlist_id):
     except Exception as e:
         print(f"Error fetching playlist details: {e}")
         messages.error(request, 'Failed to fetch playlist details.')
-        return redirect('select_playlist')
+        return HttpResponseRedirect('select_playlist')

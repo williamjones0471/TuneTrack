@@ -1,17 +1,166 @@
-{% extends 'base_generic.html' %}
 {% load static %}
 
 {% block content %}
-<h1>Bulk Remove by Artist from "{{ playlist.name }}"</h1>
-<form method="post">
-    {% csrf_token %}
-    <label for="artist_name">Select Artist:</label>
-    <select name="artist_name" id="artist_name" required>
-        {% for artist in artists %}
-            <option value="{{ artist }}">{{ artist }}</option>
-        {% endfor %}
-    </select>
-    <button type="submit">Remove All Songs by Artist</button>
-</form>
-<a href="{% url 'playlist_detail' playlist_id=playlist.id %}">Back to Playlist</a>
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Bulk Remove</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+        <style>
+            /* General Reset */
+            body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1db954, #121212);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-size: 110%
+            }
+
+            /* Navigation Bar */
+            .navbar {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 15px 40px;
+                background: rgba(0, 0, 0, 0.8);
+                box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+            }
+
+            /* Navigation Links Container */
+            .navbar nav {
+                display: flex;
+                justify-content: flex-end;
+                gap: 30px; 
+            }
+
+            .navbar a {
+                color: white;
+                text-decoration: none;
+                font-size: 1rem;
+                font-weight: 500;
+                transition: color 0.3s ease;
+            }
+
+            .navbar .logout {
+                display: flex;
+                justify-content: end;
+            }
+
+            .navbar a:hover {
+                color: #1db954;
+            }
+
+            .navbar .logo {
+                font-size: 1.5rem;
+                font-weight: 700;
+            }
+            /* Container for the bulk remove section */
+            .bulk-remove-container {
+                margin: 50px auto;
+                padding: 20px;
+                max-width: 600px;
+                text-align: center;
+                background: rgba(0, 0, 0, 0.8);
+                border-radius: 12px;
+                box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+                color: white;
+            }
+
+            /* Form elements */
+            .bulk-remove-form {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+                margin-top: 20px;
+            }
+
+            .label-select {
+                font-size: 1.2rem;
+                font-weight: 600;
+            }
+
+            .artist-select {
+                width: 100%;
+                max-width: 300px;
+                padding: 10px;
+                font-size: 1rem;
+                border: none;
+                border-radius: 8px;
+                background: rgba(255, 255, 255, 0.9);
+                color: #121212;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            .artist-select:focus {
+                outline: none;
+                border: 2px solid #1db954;
+            }
+
+            /* Button styling */
+            .btn-remove {
+                padding: 10px 20px;
+                font-size: 1rem;
+                font-weight: bold;
+                color: white;
+                background: #e50914;
+                border: none;
+                border-radius: 25px;
+                cursor: pointer;
+                transition: background 0.3s ease;
+            }
+
+            .btn-remove:hover {
+                background: #b00812;
+            }
+
+            /* Link to go back to the playlist */
+            .back-to-playlist {
+                display: inline-block;
+                margin-top: 20px;
+                font-size: 1rem;
+                color: #1db954;
+                text-decoration: none;
+                transition: color 0.3s ease;
+            }
+
+            .back-to-playlist:hover {
+                color: #1aa34a;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="navbar">
+            <nav>
+                <a href="{% url 'home' %}">Home</a>
+                <a href="{% url 'select_playlist' %}">Select a Playlist</a>
+                <a href="{% url 'playlist_detail' playlist.id %}">Back to Playlist</a>
+            </nav>
+            <a class="logout" href="{% url 'home' %}">Logout</a>
+        </div>
+        <div class="bulk-remove-container">
+            <h1>Bulk Remove by Artist from "{{ playlist.name }}"</h1>
+            <form method="post" class="bulk-remove-form">
+                {% csrf_token %}
+                <label for="artist-select" class="label-select">Select Artist:</label>
+                <select id="artist-select" name="artist_name" class="artist-select">
+                    {% if artists %}
+                        {% for artist in artists %}
+                            <option value="{{ artist }}">{{ artist }}</option>
+                        {% endfor %}
+                    {% else %}
+                        <option value="">None</option>
+                    {% endif %}
+                </select>
+                <button type="submit" class="btn-remove">Remove All Songs by Artist</button>
+            </form>
+        </div>
+    </body>
+</html>
 {% endblock %}
