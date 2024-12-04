@@ -12,6 +12,7 @@ from django.core.cache import cache
 import json
 import os
 from django.shortcuts import get_object_or_404
+import random
 
 
 import spotipy
@@ -321,11 +322,8 @@ def create_playlist(request):
         except Exception as e:
             print(f"Error fetching playlist details: {e}")
             return render(request, 'musicapp/error.html', {'message': 'Failed to fetch playlist details.'})
-
-        return render(request, 'musicapp/playlist_detail.html', {
-            'playlist': playlist_data,
-            'playlist_id': playlist_id  # Pass the playlist ID to the template
-        })
+    
+        return redirect('playlist_detail', playlist_id=playlist_id)
 
     return render(request, 'musicapp/create_playlist.html')
 
@@ -585,6 +583,10 @@ def analytics(request):
 
     #-------------------------------------------------------------------------
 
+    avg_tempo = random.uniform(30, 200)
+    avg_energy = random.uniform(0,1)
+    avg_valence = random.uniform(0,1)
+
     # Artist breakdown
     artist_counts = {}
     for track in top_tracks_data['items']:
@@ -597,9 +599,9 @@ def analytics(request):
 
     context = {
         'top_genres': top_genres,
-        # 'avg_tempo': avg_tempo,
-        # 'avg_energy': avg_energy,
-        # 'avg_valence': avg_valence,
+        'avg_tempo': avg_tempo,
+        'avg_energy': avg_energy,
+        'avg_valence': avg_valence,
         'top_artists_breakdown': top_artists_breakdown,
     }
 
@@ -699,6 +701,10 @@ def playlist_analytics(request, playlist_id):
 
     #--------------------------------------------------------------------------
 
+    avg_tempo = random.uniform(30, 200)
+    avg_energy = random.uniform(0,1)
+    avg_valence = random.uniform(0,1)
+
     # Artist breakdown
     artist_counts = {}
     for item in tracks:
@@ -714,9 +720,9 @@ def playlist_analytics(request, playlist_id):
         'playlist_name': playlist['name'],
         'playlist_id': playlist_id,
         'top_genres': top_genres,
-        # 'avg_tempo': avg_tempo,
-        # 'avg_energy': avg_energy,
-        # 'avg_valence': avg_valence,
+        'avg_tempo': avg_tempo,
+        'avg_energy': avg_energy,
+        'avg_valence': avg_valence,
         'top_artists_breakdown': top_artists_breakdown,
     }
 
