@@ -481,7 +481,7 @@ def playlist_detail(request, playlist_id):
                     'artist_name': ', '.join([artist['name'] for artist in song['track']['artists']]),
                     'duration': song['track']['duration_ms'] // 1000,
                     'image_url': song['track']['album']['images'][0]['url'] if song['track']['album']['images'] else None  # Add image URL
-                } for song in songs if song['track']
+                } for song in songs[::-1] if song['track']
             ],
         }
     except Exception as e:
