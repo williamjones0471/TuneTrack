@@ -1,40 +1,20 @@
-**CURRENT STATE OF THE PROJECT**
-William: I have set up the environment and I believe it is up and running now (python manage.py runserver to run the web app). If any of you see stuff that needs
-changed or fixed feel free to go ahead and do so, I am sort of learning Django and API stuff on the fly for this project.
+# TuneTrack
 
-10/19/2024 -
-William: To run the server you have to use the command: python manage.py runserver 0.0.0.0:8000
+## Overview
+TuneTrack is a web-based application developed as a project for our Database Management class. The project demonstrates the integration of a relational database with Django's ORM and Spotify's API to manage playlists, artists, albums, and songs. It includes advanced database features like cascading relationships and many-to-many associations.
 
-**THINGS LEFT TO STILL ADD**
-1. Make sure front end looks good and consistent
-2. Implement music recommendation advanced function (overall and per playlist)
-3. Clean up music data analytics function?
-4. Make sure that the flow of the we app is working properly (ie. not getting stuck with the wrong account, making sure the appropriate pages can get back to the home screen, etc...)
+## Features
+- **User Authentication**: Log in with a Spotify account to manage playlists.
+- **Playlist Management**: View, create, and edit playlists.
+- **Database Integration**: Tracks artists, albums, and songs with cascading relationships and foreign key constraints.
+- **Analyitics** (Somewhat): Shows users music data analytics (pre spotify ruining their own API)
+- **Bulk Remove Actions**: Lets users remove songs from playlists by artist or album
 
-To get codespaces set up:
-1. Create a codespace on main
-2. Clone the repo:
-git clone https://github.com/your-username/tunetrack.git
-cd tunetrack
+## Technology Stack
+- **Backend**: Python, Django
+- **Frontend**: HTML, CSS
+- **Database**: SQLite (Django's default)
+- **API Integration**: Spotify API
 
-3. Create a virtual environment and activate your venv:
-python3 -m venv venv
-source venv/bin/activate
-
-4. Upgrade pip:
-pip install --upgrade pip
-
-5. Create the .env file
-cp .env.example .env
-(This should just create it but if not create a file named .env and copy over the contents from .env.example)
-
-6. Install dependancies:
-pip install -r requirements.txt
-
-7. Apply database migrations:
-python manage.py migrate
-
-8. Run the server:
-python manage.py runserver
-
-(I'm pretty sure this is right not positive)
+## Purpose
+This project was created to fulfill the requirements of a Database Management class, demonstrating practical use of database models, relationships, and advanced features in a real-world application.
