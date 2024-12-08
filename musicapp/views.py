@@ -19,7 +19,7 @@ import spotipy
 import spotipy.util as util
 from spotipy.oauth2 import SpotifyOAuth
 
-from .models import User, QuizSession, Question, Playlist
+from .models import User, QuizSession, Question, Playlist, Artist, Song, Playlist_Song, Playlist, Album
 
 def login_view(request):
     cache.delete('login')
@@ -277,13 +277,21 @@ def create_playlist(request):
 
     # Initialize the Spotipy client with the user access token
     sp = spotipy.Spotify(auth=access_token)
-    print("Token scopes:", token_info['scope'])
 
     if request.method == 'POST':
         playlist_name = request.POST.get('playlist_name')
         playlist_description = request.POST.get('playlist_description')
 
+        
         user_id = sp.current_user()['id']
+        user = sp.current_user()['display_name']
+        
+        try:
+            user = User.objects.get(username=user)
+        except:
+            return render(request, 'musicapp/create_playlist.html', {
+                "message": "Playlist Creation Failed."
+            })
 
         # Create a new playlist with the provided name and description
         try:
@@ -299,6 +307,13 @@ def create_playlist(request):
             })
 
         playlist_id = playlist['id']
+
+        user_id = sp.current_user()['id']
+        user_display_name = sp.current_user()['display_name']
+        user = User.objects.get(username=user_display_name)
+
+        new_playlist = Playlist(owner=user, spotify_id=playlist_id, name=playlist['name'])
+        new_playlist.save()
 
         try:
             # Fetch playlist details from Spotify
@@ -337,16 +352,74 @@ def add_song_to_playlist(request, playlist_id):
 
     access_token = token_info.get('access_token')
     sp = spotipy.Spotify(auth=access_token)
-
+ 
     if request.method == 'POST':
         song_ids = request.POST.getlist('song_ids')
         if song_ids:
             try:
-                sp.playlist_add_items(playlist_id, song_ids)
-                return redirect('search_songs', playlist_id=playlist_id)  
+                sp.playlist_add_items(playlist_id, song_ids) 
             except Exception as e:
                 print(f"Error adding songs to playlist: {e}")
                 return render(request, 'musicapp/error.html', {'message': 'Failed to add songs to playlist.'})
+            
+            user_id = sp.current_user()['id']
+            user_display_name = sp.current_user()['display_name']
+            user = User.objects.get(username=user_display_name)
+
+            for song_id in song_ids:
+                # print(song_ids)
+                # if len(song_ids) < 2:
+                #     song = sp.tracks(song_ids)
+                #     print(song)
+                # else:
+                song = sp.tracks([song_id])
+                print(song_id)
+
+                artist_name = song['tracks'][0]['artists'][0]['name']
+                artist_id = song['tracks'][0]['artists'][0]['id']
+
+                uri = song['tracks'][0]['album']['uri']
+                album_id = uri.split(":")[-1]
+                album_name = song['tracks'][0]['album']['name']
+                release_date = song['tracks'][0]['album']['release_date']
+
+                song_name = song['tracks'][0]['name']
+                duration = song['tracks'][0]['duration_ms'] // 1000
+                release_date = song['tracks'][0]['album']['release_date']
+                release_year = release_date.split("-")[0]
+
+                try:
+                    artist = Artist.objects.get(artist_id=artist_id)
+                except ObjectDoesNotExist:
+                    new_artist = Artist(artist_id=artist_id, name=artist_name)
+                    new_artist.save()
+
+                artist = Artist.objects.get(artist_id=artist_id)
+
+                try: 
+                    album = Album.objects.get(album_id=album_id)
+                except ObjectDoesNotExist:
+                    new_album = Album(album_id=album_id, artist_id=artist, title=album_name, release_date=release_date)
+                    new_album.save()
+
+                album = Album.objects.get(album_id=album_id)
+
+                try:
+                    song = Song.objects.get(song_id=song_id)
+                except ObjectDoesNotExist:
+                    new_song = Song(song_id=song_id, artist_id=artist, album_id=album, title=song_name, release_year=release_year, duration=duration)
+                    new_song.save()
+
+                song = Song.objects.get(song_id=song_id)
+                playlist = Playlist.objects.get(spotify_id=playlist_id)
+
+                try: 
+                    playlist_song = Playlist_Song.objects.get(playlist=playlist, song=song)
+                except ObjectDoesNotExist:
+                    new_playlist_song = Playlist_Song(playlist=playlist, song=song)
+                    new_playlist_song.save()
+
+            return redirect('search_songs', playlist_id=playlist_id) 
 
     return redirect('search_songs', playlist_id)
 
@@ -448,7 +521,6 @@ def select_playlist(request):
             playlist_info.append(playlist_data)
     except:
         pass
-    
 
     return render(request, 'musicapp/select_playlist.html', {
         'playlist_info': playlist_info,
@@ -487,6 +559,73 @@ def playlist_detail(request, playlist_id):
     except Exception as e:
         print(f"Error fetching playlist details: {e}")
         return render(request, 'musicapp/error.html', {'message': 'Failed to fetch playlist details.'})
+    
+    # print("Playlist IDs:", playlist_ids)
+
+    user_id = sp.current_user()['id']
+    user_display_name = sp.current_user()['display_name']
+    user = User.objects.get(username=user_display_name)
+    song_id = []
+
+    try:
+        Playlist.objects.get(spotify_id=playlist_id)
+    except:
+        new_playlist = Playlist(owner=user, spotify_id=playlist_id, name=playlist_data['name'])
+        new_playlist.save()
+
+    print(playlist_id, "\n\n")
+
+    results = sp.playlist_tracks(playlist_id=playlist_id)
+    tracks = results.get('items', [])
+
+
+    for track in tracks:
+        if track and track.get('track'):
+            track_info = track['track']
+            
+            artist_name = track_info['artists'][0]['name']
+            artist_id = track_info['artists'][0]['id']
+
+            album_uri = track_info['album']['uri']
+            album_id = album_uri.split(":")[-1]
+            album_name = track_info['album']['name']
+            release_date = track_info['album']['release_date']
+
+            song_id = track_info['id']
+            song_name = track_info['name']
+            duration = track_info['duration_ms'] // 1000
+            release_year = release_date.split("-")[0]
+
+            try:
+                artist = Artist.objects.get(artist_id=artist_id)
+            except ObjectDoesNotExist:
+                new_artist = Artist(artist_id=artist_id, name=artist_name)
+                new_artist.save()
+
+            artist = Artist.objects.get(artist_id=artist_id)
+
+            try: 
+                album = Album.objects.get(album_id=album_id)
+            except ObjectDoesNotExist:
+                new_album = Album(album_id=album_id, artist_id=artist, title=album_name, release_date=release_date)
+                new_album.save()
+
+            album = Album.objects.get(album_id=album_id)
+
+            try:
+                song = Song.objects.get(song_id=song_id)
+            except ObjectDoesNotExist:
+                new_song = Song(song_id=song_id, artist_id=artist, album_id=album, title=song_name, release_year=release_year, duration=duration)
+                new_song.save()
+
+            song = Song.objects.get(song_id=song_id)
+            playlist = Playlist.objects.get(spotify_id=playlist_id)
+
+            try: 
+                playlist_song = Playlist_Song.objects.get(song=song)
+            except ObjectDoesNotExist:
+                new_playlist_song = Playlist_Song(playlist=playlist, song=song)
+                new_playlist_song.save()
 
     return render(request, 'musicapp/playlist_detail.html', {
         'playlist': playlist_data,
@@ -510,6 +649,15 @@ def delete_song_from_playlist(request, playlist_id, song_id):
         print(dir(sp))
         # Remove the song from the playlist using the Spotify API
         sp.playlist_remove_all_occurrences_of_items(playlist_id, [song_id],)
+
+        song = Song.objects.get(song_id=song_id)
+
+        try:
+            playlist_song = Playlist_Song.objects.get(song=song)
+            playlist_song.delete()
+        except:
+            pass
+
     except Exception as e:
         print(f"Error removing song: {e}")
         return render(request, 'musicapp/error.html', {'message': 'Failed to remove song from playlist.'})

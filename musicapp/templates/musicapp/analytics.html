@@ -111,31 +111,35 @@
         <div class="graph-list">
 
         </div>
+        
+        {% if not top_genres or not top_artists_breakdown %}
+            <h2>No Artist Data. Listen to Music to get Results or Look at Playlists for Analytics</h2>
+        {% else %}
+            <h2>Top Genres</h2>
+            <div class="graph-card">
+                <canvas id="genresChart" width="100%" height="80%"></canvas>
+            </div>
 
-        <h2>Top Genres</h2>
-        <div class="graph-card">
-            <canvas id="genresChart" width="100%" height="80%"></canvas>
+            <h2>Average Tempo</h2>
+            <p>{{ avg_tempo|floatformat:2 }} BPM</p>
+
+            <h2>Average Energy</h2>
+            <p>{{ avg_energy|floatformat:2 }}</p>
+
+            <h2>Average Valence (Happiness)</h2>
+            <p>{{ avg_valence|floatformat:2 }}</p>
+
+            <h2>Top Artists</h2>
+
+            <div class="graph-card">
+                <canvas id="artistsChart" width="400" height="200" title=""></canvas>
+            </div>
+
+            <!-- Include the JSON data safely -->
+            {{ top_genres|json_script:"top-genres-data" }}
+            {{ top_artists_breakdown|json_script:"top-artists-data" }}
         </div>
-
-        <h2>Average Tempo</h2>
-        <p>{{ avg_tempo|floatformat:2 }} BPM</p>
-
-        <h2>Average Energy</h2>
-        <p>{{ avg_energy|floatformat:2 }}</p>
-
-        <h2>Average Valence (Happiness)</h2>
-        <p>{{ avg_valence|floatformat:2 }}</p>
-
-        <h2>Top Artists</h2>
-
-        <div class="graph-card">
-            <canvas id="artistsChart" width="400" height="200" title=""></canvas>
-        </div>
-
-        <!-- Include the JSON data safely -->
-        {{ top_genres|json_script:"top-genres-data" }}
-        {{ top_artists_breakdown|json_script:"top-artists-data" }}
-    </div>
+    {% endif %}
 
     <script>
         // Parse the JSON data safely

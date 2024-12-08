@@ -26,18 +26,24 @@ class User(AbstractUser):
 
 
 class Artist(models.Model):
-    artist_id = models.IntegerField(primary_key=True)
+    artist_id = models.CharField(primary_key=True, max_length=64)
     name = models.CharField(max_length=128)
     genre = models.CharField(max_length=255, null=False, default="Unknown")
 
+    def __str__(self):
+        return f"{self.name}"
+
 class Album(models.Model):
-    album_id = models.IntegerField(primary_key=True)
+    album_id = models.CharField(primary_key=True, max_length=64)
     artist_id = models.ForeignKey(Artist, on_delete=models.CASCADE)
     title = models.CharField(max_length=128)
     release_date = models.DateField(max_length=64)
 
+    def __str__(self):
+        return f"{self.title}"
+
 class Song(models.Model):
-    song_id = models.IntegerField(primary_key=True)
+    song_id = models.CharField(primary_key=True, max_length=64)
     artist_id = models.ForeignKey(Artist, max_length=64, on_delete=models.CASCADE)
     album_id = models.ForeignKey(Album, max_length=64, on_delete=models.CASCADE)
     title = models.CharField(max_length=128)
@@ -47,15 +53,8 @@ class Song(models.Model):
     
 
     def __str__(self):
-        return f"{self.title} by {self.artist_name}"
+        return f"{self.title}"
 
-class Playlist_Song(models.Model):
-    playlist = models.ForeignKey('Playlist', on_delete=models.CASCADE) 
-    song = models.ForeignKey(Song, on_delete=models.CASCADE)           
-    date_added = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ('playlist', 'song')
 
 class Playlist(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -66,6 +65,26 @@ class Playlist(models.Model):
 
     def __str__(self):
         return self.name
+    
+class Playlist_Song(models.Model):
+    playlist = models.ForeignKey(
+        'Playlist', 
+        on_delete=models.CASCADE,  # Delete the Playlist_Song entry if the Playlist is deleted
+        related_name='playlist_songs'
+    )
+    song = models.ForeignKey(
+        'Song', 
+        on_delete=models.CASCADE,  # Delete the Playlist_Song entry if the Song is deleted
+        related_name='song_playlists'
+    )
+    date_added = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.song} in playlist: {self.playlist}"
+
+    class Meta:
+        unique_together = ('playlist', 'song')
+        ordering = ['-date_added']
 
 
 
