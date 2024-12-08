@@ -519,7 +519,6 @@ def select_playlist(request):
             playlist_info.append(playlist_data)
     except:
         pass
-    
 
     return render(request, 'musicapp/select_playlist.html', {
         'playlist_info': playlist_info,
@@ -558,6 +557,73 @@ def playlist_detail(request, playlist_id):
     except Exception as e:
         print(f"Error fetching playlist details: {e}")
         return render(request, 'musicapp/error.html', {'message': 'Failed to fetch playlist details.'})
+    
+    # print("Playlist IDs:", playlist_ids)
+
+    user_id = sp.current_user()['id']
+    user_display_name = sp.current_user()['display_name']
+    user = User.objects.get(username=user_display_name)
+    song_id = []
+
+    try:
+        Playlist.objects.get(spotify_id=playlist_id)
+    except:
+        new_playlist = Playlist(owner=user, spotify_id=playlist_id, name=playlist_data['name'])
+        new_playlist.save()
+
+    print(playlist_id, "\n\n")
+
+    results = sp.playlist_tracks(playlist_id=playlist_id)
+    tracks = results.get('items', [])
+
+
+    for track in tracks:
+        if track and track.get('track'):
+            track_info = track['track']
+            
+            artist_name = track_info['artists'][0]['name']
+            artist_id = track_info['artists'][0]['id']
+
+            album_uri = track_info['album']['uri']
+            album_id = album_uri.split(":")[-1]
+            album_name = track_info['album']['name']
+            release_date = track_info['album']['release_date']
+
+            song_id = track_info['id']
+            song_name = track_info['name']
+            duration = track_info['duration_ms'] // 1000
+            release_year = release_date.split("-")[0]
+
+            try:
+                artist = Artist.objects.get(artist_id=artist_id)
+            except ObjectDoesNotExist:
+                new_artist = Artist(artist_id=artist_id, name=artist_name)
+                new_artist.save()
+
+            artist = Artist.objects.get(artist_id=artist_id)
+
+            try: 
+                album = Album.objects.get(album_id=album_id)
+            except ObjectDoesNotExist:
+                new_album = Album(album_id=album_id, artist_id=artist, title=album_name, release_date=release_date)
+                new_album.save()
+
+            album = Album.objects.get(album_id=album_id)
+
+            try:
+                song = Song.objects.get(song_id=song_id)
+            except ObjectDoesNotExist:
+                new_song = Song(song_id=song_id, artist_id=artist, album_id=album, title=song_name, release_year=release_year, duration=duration)
+                new_song.save()
+
+            song = Song.objects.get(song_id=song_id)
+            playlist = Playlist.objects.get(spotify_id=playlist_id)
+
+            try: 
+                playlist_song = Playlist_Song.objects.get(song=song)
+            except ObjectDoesNotExist:
+                new_playlist_song = Playlist_Song(playlist=playlist, song=song)
+                new_playlist_song.save()
 
     return render(request, 'musicapp/playlist_detail.html', {
         'playlist': playlist_data,
