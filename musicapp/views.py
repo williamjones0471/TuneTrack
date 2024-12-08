@@ -410,9 +410,11 @@ def add_song_to_playlist(request, playlist_id):
                     new_song = Song(song_id=song_id, artist_id=artist, album_id=album, title=song_name, release_year=release_year, duration=duration)
                     new_song.save()
 
+                song = Song.objects.get(song_id=song_id)
+                playlist = Playlist.objects.get(spotify_id=playlist_id)
+
                 try: 
-                    playlist = Playlist.objects.get(spotify_id=playlist_id)
-                    playlist_song = Playlist_Song.objects.get(song=song)
+                    playlist_song = Playlist_Song.objects.get(playlist=playlist, song=song)
                 except ObjectDoesNotExist:
                     new_playlist_song = Playlist_Song(playlist=playlist, song=song)
                     new_playlist_song.save()
